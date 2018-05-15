@@ -1,0 +1,29 @@
+<resources>
+
+    <!-- Base application theme. -->
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light">
+        <item name="windowNoTitle">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+
+        <item name="colorPrimary">@color/dark_background</item>
+        <item name="colorPrimaryDark">@color/dark_background</item>
+        <item name="colorAccent">@color/cream</item>
+    </style>
+
+
+    <!-- Splash Screen Theme -->
+    <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash</item>
+    </style>
+
+
+    <!-- Settings CheckBox -->
+    <style name="Theme_CheckBox" parent="Theme.AppCompat.Light">
+        <item name="colorControlNormal">@color/dark_background</item>
+        <item name="colorControlActivated">@color/dot_violet</item>
+        <item name="colorAccent">@color/dot_violet</item>
+    </style>
+
+</resources>

@@ -1,0 +1,5 @@
+<resources>
+    <dimen name="fab_margin">16dp</dimen>
+    <dimen name="pin_size">24sp</dimen>
+    <dimen name="settings">240dp</dimen>
+</resources>

@@ -1,0 +1,40 @@
+<resources>
+    <declare-styleable name="GraphSurfaceView">
+        <attr name="defaultColor" format="color|reference" />
+        <attr name="edgeColor" format="color|reference" />
+        <attr name="nodeColor" format="color|reference" />
+        <attr name="nodeBgColor" format="color|reference" />
+    </declare-styleable>
+
+    <declare-styleable name="Avatar">
+        <attr name="degree" format="integer" />
+        <attr name="label" format="string" />
+    </declare-styleable>
+
+    <!-- Declare custom theme attributes that allow changing which styles are
+         used for button bars depending on the API level.
+         ?android:attr/buttonBarStyle is new as of API 11 so this is
+         necessary to support previous API levels. -->
+    <declare-styleable name="ButtonBarContainerTheme">
+        <attr name="metaButtonBarStyle" format="reference" />
+        <attr name="metaButtonBarButtonStyle" format="reference" />
+    </declare-styleable>
+
+
+    <!--<declare-styleable name="ProgressWheel">-->
+    <!--<attr name="pwText" format="string" />-->
+    <!--<attr name="pwTextColor" format="color" />-->
+    <!--<attr name="pwTextSize" format="dimension" />-->
+    <!--<attr name="pwBarColor" format="color" />-->
+    <!--<attr name="pwRimColor" format="color" />-->
+    <!--<attr name="pwRimWidth" format="dimension" />-->
+    <!--<attr name="pwSpinSpeed" format="integer" />-->
+    <!--<attr name="pwCircleColor" format="color" />-->
+    <!--<attr name="pwRadius" format="dimension" />-->
+    <!--<attr name="pwBarWidth" format="dimension" />-->
+    <!--<attr name="pwBarLength" format="dimension" />-->
+    <!--<attr name="pwDelayMillis" format="dimension"/>-->
+    <!--<attr name="pwContourColor" format="color"/>-->
+    <!--<attr name="pwContourSize" format="float"/>-->
+    <!--</declare-styleable>-->
+</resources>

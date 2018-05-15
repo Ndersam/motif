@@ -1,0 +1,81 @@
+<!-- Copyright (C) 2012 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#FF4081</color>
+    <color name="divider">#fffefe</color>
+
+
+    <color name="white">#ffffff</color>
+    <color name="orange">#ffd27f</color>
+    <color name="dark_orange">#ffb732</color>
+    <color name="text_color">#272928</color>
+    <!--<color name="text_color">#292f33</color>-->
+    <color name="black">#000000</color>
+    <color name="light_text">#c3c4c4</color>
+    <color name="medium_text">#7e7e7e</color>
+
+    <!--<color name="medium_text">#898989</color>-->
+    <color name="light_grey">#ECEFF1</color>
+    <color name="transparent">#80000000</color>
+    <color name="green">#3f7600</color>
+
+    <color name="light_white">#d5d5d5</color>
+    <color name="dull_white">#F5F5F5</color>
+
+    <color name="bottom_bar_text_color">#6b6d7b</color>
+    <color name="red">#b71c1c</color>
+
+    <color name="cyan_light">#eaf6fb</color>
+    <color name="cyan_medium">#96d4e9</color>
+    <color name="dark_white">#efeeec</color>
+    <color name="yellow">#FFC107</color>
+    <color name="light_blue">#d7effe</color>
+    <color name="dark_blue">#28a7fc</color>
+    <color name="selected_tab_color">#0096ff</color>
+    <color name="unselected_tab">#acacac</color>
+    <color name="dark_text">#4d4d4d</color>
+    <color name="seafoam">#ffc6f9e5</color>
+    <color name="chartreuse">#ffb6e9b5</color>
+    <color name="emerald">#ffa6d9b5</color>
+    <color name="bluegrass">#ff96c9b5</color>
+    <color name="turquoise">#ff86b9b5</color>
+    <color name="slate">#ff76a9b5</color>
+
+
+    <color name="pinColor">#FF4081</color>
+    <color name="cream">#FFF6D5</color>
+
+    <color name="darkChocolate">#301E08</color>
+    <color name="yellowBrown">#E5A83E</color>
+
+    <!-- Dot Colors -->
+    <color name="dot_violet">#8E5DAA</color>
+    <color name="dot_red">#FF505B</color>
+    <color name="dot_orange">#FF7B06</color>
+    <color name="dot_green">#78C26A</color>
+    <color name="dot_yellow">#FFD935</color>
+    <color name="dot_blue">#81B3FF</color>
+    <color name="dot_indigo">#324056</color>
+
+    <color name="black_overlay">#66000000</color>
+    <color name="dark_background">#202020</color>
+    <color name="levelcomplete">#5A8DBA</color>
+    <color name="levelfailed">#FFC107</color>
+
+    <color name="ltgray">#ffcccccc</color>
+</resources>

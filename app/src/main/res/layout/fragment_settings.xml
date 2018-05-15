@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:background="@color/white">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Settings"
+        android:textSize="18sp"
+        android:textColor="#1f1f1f"
+        android:fontFamily="@font/alfa_slab_one"/>
+
+    <!-- Sound -->
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:layout_margin="8dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:gravity="start"
+            android:layout_marginEnd="8dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Sounds"
+            android:textColor="@color/dot_violet"
+            android:textSize="18sp"
+            android:elevation="8dp"/>
+
+        <SeekBar
+            android:id="@+id/sound_control"
+            android:layout_gravity="end|bottom"
+            android:foregroundGravity="right"
+            android:splitTrack="false"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:padding="0dp"
+            android:progress="40"
+            android:progressDrawable="@drawable/track_drawable"
+            android:thumb="@drawable/thumb_drawable"/>
+    </LinearLayout>
+
+    <!-- Music -->
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:layout_margin="8dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:padding="0dp"
+        android:orientation="horizontal">
+
+        <TextView
+            android:gravity="start"
+            android:layout_marginRight="8dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Music"
+            android:textColor="@color/dot_violet"
+            android:textSize="18sp"/>
+
+        <SeekBar
+            android:id="@+id/music_control"
+            android:layout_gravity="end|bottom"
+            android:foregroundGravity="right"
+            android:splitTrack="false"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:padding="0dp"
+            android:progress="40"
+            android:progressDrawable="@drawable/track_drawable"
+            android:thumb="@drawable/thumb_drawable"
+            android:elevation="8dp"/>
+
+    </LinearLayout>
+
+
+    <!-- Vibration -->
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:layout_margin="8dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:gravity="start"
+            android:layout_marginRight="8dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Haptic Feedback"
+            android:textColor="@color/dot_violet"
+            android:textSize="18sp"/>
+
+        <CheckBox
+            android:id="@+id/vibration_control"
+            android:theme="@style/Theme_CheckBox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+
+    <!-- Difficulty -->
+    <LinearLayout
+        android:layout_width="300dp"
+        android:layout_height="wrap_content"
+        android:elevation="4dp"
+        android:layout_margin="8dp"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:gravity="start"
+            android:layout_marginRight="8dp"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="Difficulty"
+            android:textColor="@color/dot_violet"
+            android:textSize="18sp"/>
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

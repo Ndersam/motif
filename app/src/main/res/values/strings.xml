@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Motif</string>
+    <string name="reset_button">Reset</string>
+    <string name="default_avatar_label">MA0000</string>
+    <string name="default_score">0</string>
+    <string name="title_activity_splash">SplashActivity</string>
+    <string name="popping_pin">Popping Pin</string>
+    <string name="switch_on">on</string>
+    <string name="switch_off">off</string>
+
+    <string name="title_activity_home">HomeActivity</string>
+    <string name="dummy_button">Play</string>
+
+    <!-- About Page -->
+    <string name="about_description">
+
+
+        <p>
+            Motif is puzzle game about connecting dots. It is part of a research project developed
+            at the City University of Hong Kong.
+        </p>
+
+        <p>
+        Motif brings to life the data collated from a research. The data is akin to a social network.
+        There are nodes (people in a social network) and numerical values, known as edges, that represent the strength
+        of relationship between the nodes.
+        Each node has a numerical value associated with it. This value correlates with the presence of certain quality.
+        The nodes have divided into seven based on the this value. The groups are the seven colors of the rainbow,
+        with red representing the values in the top 13% and violet representing values in the bottom 13%.
+        </p>
+        <p>
+            The objective of the game is to connect as many types of dots as possible.
+        </p>
+
+    </string>
+
+    <string name="about_version">Version 1.0</string>
+    <string name="about_playstore_remark">Rate on Play Store</string>
+    <string name="about_github_remark">Visit Github page</string>
+    <string name="about_copyright">Copyright 2018 \u00A9 City University of Hong Kong.</string>
+</resources>
