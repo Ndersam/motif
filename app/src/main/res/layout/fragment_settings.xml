@@ -4,199 +4,242 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center"
     android:background="@color/white">
 
-    <TextView
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:layout_gravity="center">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Settings"
+                android:textSize="18sp"
+                android:textColor="#1f1f1f"
+                android:fontFamily="@font/alfa_slab_one"/>
+
+            <!-- Sound -->
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:elevation="4dp"
+                android:layout_margin="8dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:gravity="start"
+                    android:layout_marginEnd="8dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Sounds"
+                    android:textColor="@color/dot_violet"
+                    android:textSize="18sp"
+                    android:elevation="8dp"/>
+
+                <SeekBar
+                    android:id="@+id/sound_control"
+                    android:layout_gravity="end|bottom"
+                    android:foregroundGravity="right"
+                    android:splitTrack="false"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:padding="0dp"
+                    android:progress="40"
+                    android:progressDrawable="@drawable/track_drawable"
+                    android:thumb="@drawable/thumb_drawable"/>
+            </LinearLayout>
+
+            <!-- Music -->
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:elevation="4dp"
+                android:layout_margin="8dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:padding="0dp"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:gravity="start"
+                    android:layout_marginRight="8dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Music"
+                    android:textColor="@color/dot_violet"
+                    android:textSize="18sp"/>
+
+                <SeekBar
+                    android:id="@+id/music_control"
+                    android:layout_gravity="end|bottom"
+                    android:foregroundGravity="right"
+                    android:splitTrack="false"
+                    android:layout_width="150dp"
+                    android:layout_height="match_parent"
+                    android:padding="0dp"
+                    android:progress="40"
+                    android:progressDrawable="@drawable/track_drawable"
+                    android:thumb="@drawable/thumb_drawable"
+                    android:elevation="8dp"/>
+
+            </LinearLayout>
+
+
+            <!-- Vibration -->
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:elevation="4dp"
+                android:layout_margin="8dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:gravity="start"
+                    android:layout_marginRight="8dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Haptic Feedback"
+                    android:textColor="@color/dot_violet"
+                    android:textSize="18sp"/>
+
+                <CheckBox
+                    android:id="@+id/vibration_control"
+                    android:theme="@style/Theme_CheckBox"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+
+            </LinearLayout>
+
+            <!-- Difficulty -->
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:elevation="4dp"
+                android:layout_margin="8dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:gravity="start"
+                    android:layout_marginRight="8dp"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Difficulty"
+                    android:textColor="@color/dot_violet"
+                    android:textSize="18sp"/>
+
+
+            </LinearLayout>
+
+            <!-- Difficulty levels -->
+            <LinearLayout
+                android:layout_width="300dp"
+                android:layout_height="34dp"
+                android:elevation="4dp"
+                android:layout_margin="8dp"
+                android:layout_gravity="center"
+                android:gravity="center"
+                android:orientation="horizontal">
+
+                <Button
+                    android:layout_margin="2dp"
+                    android:id="@+id/options_easy_mode"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="match_parent"
+                    android:text="Easy"
+                    android:textSize="10sp"
+                    android:padding="2dp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/unchecked_button"/>
+
+
+                <Button
+                    android:id="@+id/options_medium_mode"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="2dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/unchecked_button"
+                    android:padding="2dp"
+                    android:text="Normal"
+                    android:textColor="@color/white"
+                    android:textSize="10sp" />
+
+                <Button
+                    android:layout_margin="2dp"
+                    android:id="@+id/options_hard_mode"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Hard"
+                    android:textSize="10sp"
+                    android:padding="2dp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/unchecked_button"/>
+
+                <Button
+                    android:layout_margin="2dp"
+                    android:id="@+id/options_extreme_mode"
+                    android:layout_width="0dp"
+                    android:layout_weight="1"
+                    android:layout_height="wrap_content"
+                    android:text="Extreme"
+                    android:textSize="10sp"
+                    android:padding="2dp"
+                    android:textColor="@color/white"
+                    android:background="@drawable/unchecked_button"/>
+
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+
+
+
+    <LinearLayout
+        android:id="@+id/options_back"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Settings"
-        android:textSize="18sp"
-        android:textColor="#1f1f1f"
-        android:fontFamily="@font/alfa_slab_one"/>
+        android:orientation="horizontal"
+        android:layout_gravity="bottom"
+        android:padding="16dp">
 
-    <!-- Sound -->
-    <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:elevation="4dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:orientation="horizontal">
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:background="@drawable/back_button"
+            android:scaleType="fitXY"
+            android:clickable="true"
+            android:focusable="true"
+            android:layout_gravity="center"/>
 
         <TextView
-            android:gravity="start"
-            android:layout_marginEnd="8dp"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Sounds"
-            android:textColor="@color/dot_violet"
-            android:textSize="18sp"
-            android:elevation="8dp"/>
-
-        <SeekBar
-            android:id="@+id/sound_control"
-            android:layout_gravity="end|bottom"
-            android:foregroundGravity="right"
-            android:splitTrack="false"
-            android:layout_width="150dp"
-            android:layout_height="match_parent"
-            android:padding="0dp"
-            android:progress="40"
-            android:progressDrawable="@drawable/track_drawable"
-            android:thumb="@drawable/thumb_drawable"/>
-    </LinearLayout>
-
-    <!-- Music -->
-    <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:elevation="4dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:padding="0dp"
-        android:orientation="horizontal">
-
-        <TextView
-            android:gravity="start"
-            android:layout_marginRight="8dp"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Music"
-            android:textColor="@color/dot_violet"
-            android:textSize="18sp"/>
-
-        <SeekBar
-            android:id="@+id/music_control"
-            android:layout_gravity="end|bottom"
-            android:foregroundGravity="right"
-            android:splitTrack="false"
-            android:layout_width="150dp"
-            android:layout_height="match_parent"
-            android:padding="0dp"
-            android:progress="40"
-            android:progressDrawable="@drawable/track_drawable"
-            android:thumb="@drawable/thumb_drawable"
-            android:elevation="8dp"/>
-
-    </LinearLayout>
-
-
-    <!-- Vibration -->
-    <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:elevation="4dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <TextView
-            android:gravity="start"
-            android:layout_marginRight="8dp"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Haptic Feedback"
-            android:textColor="@color/dot_violet"
-            android:textSize="18sp"/>
-
-        <CheckBox
-            android:id="@+id/vibration_control"
-            android:theme="@style/Theme_CheckBox"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content" />
-
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:background="@color/white"
+            android:gravity="center"
+            android:text="Back"
+            android:textSize="18sp" />
     </LinearLayout>
-
-    <!-- Difficulty -->
-    <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="wrap_content"
-        android:elevation="4dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <TextView
-            android:gravity="start"
-            android:layout_marginRight="8dp"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Difficulty"
-            android:textColor="@color/dot_violet"
-            android:textSize="18sp"/>
-
-
-    </LinearLayout>
-
-    <!-- Difficulty levels -->
-    <LinearLayout
-        android:layout_width="300dp"
-        android:layout_height="34dp"
-        android:elevation="4dp"
-        android:layout_margin="8dp"
-        android:layout_gravity="center"
-        android:gravity="center"
-        android:orientation="horizontal">
-
-        <Button
-            android:layout_margin="2dp"
-            android:id="@+id/options_easy_mode"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="match_parent"
-            android:text="Easy"
-            android:textSize="10sp"
-            android:padding="2dp"
-            android:textColor="@color/white"
-            android:background="@drawable/unchecked_button"/>
-
-
-        <Button
-            android:id="@+id/options_medium_mode"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_margin="2dp"
-            android:layout_weight="1"
-            android:background="@drawable/unchecked_button"
-            android:padding="2dp"
-            android:text="Normal"
-            android:textColor="@color/white"
-            android:textSize="10sp" />
-
-        <Button
-            android:layout_margin="2dp"
-            android:id="@+id/options_hard_mode"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Hard"
-            android:textSize="10sp"
-            android:padding="2dp"
-            android:textColor="@color/white"
-            android:background="@drawable/unchecked_button"/>
-
-        <Button
-            android:layout_margin="2dp"
-            android:id="@+id/options_extreme_mode"
-            android:layout_width="0dp"
-            android:layout_weight="1"
-            android:layout_height="wrap_content"
-            android:text="Extreme"
-            android:textSize="10sp"
-            android:padding="2dp"
-            android:textColor="@color/white"
-            android:background="@drawable/unchecked_button"/>
-
-    </LinearLayout>
-
 
 </LinearLayout>

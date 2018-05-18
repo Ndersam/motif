@@ -32,8 +32,14 @@ public class SettingsFragment extends Fragment {
 
         SeekBar soundControl = mContentView.findViewById(R.id.sound_control);
         SeekBar musicControl = mContentView.findViewById(R.id.music_control);
-        final CheckBox vibrationControl = mContentView.findViewById(R.id.vibration_control);
+        CheckBox vibrationControl = mContentView.findViewById(R.id.vibration_control);
 
+
+        /////////////////////////////
+        //
+        // SOUND
+        //
+        ////////////////////////////
         soundControl.setProgress(pref.getInt(Constants.KEY_SOUND_LEVEL, 100));
         soundControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -48,6 +54,11 @@ public class SettingsFragment extends Fragment {
             public void onStopTrackingTouch(SeekBar seekBar) { }
         });
 
+        /////////////////////////////
+        //
+        // MUSIC
+        //
+        ////////////////////////////
         musicControl.setProgress(pref.getInt(Constants.KEY_MUSIC_LEVEL, 40));
         musicControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -61,15 +72,26 @@ public class SettingsFragment extends Fragment {
             public void onStopTrackingTouch(SeekBar seekBar) { }
         });
 
+
+        /////////////////////////////
+        //
+        // VIBRATION
+        //
+        ////////////////////////////
         vibrationControl.setChecked(pref.getBoolean(Constants.KEY_VIBRATION_ENABLED, false));
         vibrationControl.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                pref.edit().putBoolean(Constants.KEY_VIBRATION_ENABLED, vibrationControl.isChecked())
+                pref.edit().putBoolean(Constants.KEY_VIBRATION_ENABLED, isChecked)
                     .apply();
             }
         });
 
+        /////////////////////////////
+        //
+        // DIFFICULTY SETTINGS
+        //
+        ////////////////////////////
 
         Button btnEasyMode = mContentView.findViewById(R.id.options_easy_mode);
         Button btnMediumMode = mContentView.findViewById(R.id.options_medium_mode);
@@ -107,9 +129,17 @@ public class SettingsFragment extends Fragment {
         if(btn != null){
             btn.setBackground(getResources().getDrawable(R.drawable.checked_button, null));
         }
+
+
+       // Back Button
+        ViewGroup backBtn = mContentView.findViewById(R.id.options_back);
+        backBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                getActivity().onBackPressed();
+            }
+        });
         return mContentView;
     }
-
-
 
 }
