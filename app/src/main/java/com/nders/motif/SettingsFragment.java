@@ -8,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
@@ -70,7 +71,45 @@ public class SettingsFragment extends Fragment {
         });
 
 
+        Button btnEasyMode = mContentView.findViewById(R.id.options_easy_mode);
+        Button btnMediumMode = mContentView.findViewById(R.id.options_medium_mode);
+        Button btnHardMode = mContentView.findViewById(R.id.options_hard_mode);
+        Button btnExtremeMode = mContentView.findViewById(R.id.options_extreme_mode);
+
+        View.OnClickListener difficultyListener = new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String tag = pref.getString(Constants.KEY_GAME_DIFFICULTY, Constants.NORMAL_MODE);
+                Button btn = mContentView.findViewWithTag(tag);
+                if(btn != null){
+                    btn.setBackground(getResources().getDrawable(R.drawable.unchecked_button, null));
+                }
+                pref.edit().putString(Constants.KEY_GAME_DIFFICULTY, (String)v.getTag()).apply();
+                v.setBackground(getResources().getDrawable(R.drawable.checked_button, null));
+            }
+        };
+
+        btnEasyMode.setTag(Constants.EASY_MODE);
+        btnEasyMode.setOnClickListener(difficultyListener);
+
+        btnMediumMode.setTag(Constants.NORMAL_MODE);
+        btnMediumMode.setOnClickListener(difficultyListener);
+
+        btnHardMode.setTag(Constants.HARD_MODE);
+        btnHardMode.setOnClickListener(difficultyListener);
+
+        btnExtremeMode.setTag(Constants.EXTREME_MODE);
+        btnExtremeMode.setOnClickListener(difficultyListener);
+
+
+        String tag = pref.getString(Constants.KEY_GAME_DIFFICULTY, Constants.NORMAL_MODE);
+        Button btn = mContentView.findViewWithTag(tag);
+        if(btn != null){
+            btn.setBackground(getResources().getDrawable(R.drawable.checked_button, null));
+        }
         return mContentView;
     }
+
+
 
 }

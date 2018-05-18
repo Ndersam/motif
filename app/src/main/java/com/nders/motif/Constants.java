@@ -144,6 +144,10 @@ public  class Constants {
     public static final String KEY_SOUND_LEVEL = "sound_level";
     public static final String KEY_GAME_DIFFICULTY = "game_difficulty";
     public static final String KEY_GAME_COMPLETE = "game_complete";
+    public static final String EASY_MODE = "easy_mode";
+    public static final String NORMAL_MODE = "normal_mode";
+    public static final String HARD_MODE = "hard_mode";
+    public static final String EXTREME_MODE = "extreme_mode";
 
 
     /*
