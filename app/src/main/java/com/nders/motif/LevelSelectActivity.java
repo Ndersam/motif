@@ -50,6 +50,8 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+        Intent intent = new Intent(this, HomeActivity.class);
+        startActivity(intent);
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
     }
 

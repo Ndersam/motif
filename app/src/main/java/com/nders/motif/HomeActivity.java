@@ -10,9 +10,7 @@ import android.widget.Button;
 
 public class HomeActivity extends AppCompatActivity {
 
-    /*
-    *   Media
-    */
+
     private SoundHelper mSoundHelper;
 
 
@@ -32,6 +30,7 @@ public class HomeActivity extends AppCompatActivity {
                 Intent intent  = new Intent(HomeActivity.this, LevelSelectActivity.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                finish();
             }
         });
 
@@ -55,7 +54,7 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
 
-        // Sounds
+
         mSoundHelper = new SoundHelper(this);
         mSoundHelper.prepareMusicPlayer(getApplicationContext());
 
