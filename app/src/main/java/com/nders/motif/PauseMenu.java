@@ -99,11 +99,15 @@ public class PauseMenu extends DialogFragment {
 
                 if(f instanceof PauseMenu){
                     int gameId = GameFragment.getInstance().getGameID();
-                    GameFragment.quitInstance();
+//                    GameFragment.quitInstance();
+//
+//                    GameFragment gameFragment = GameFragment.getInstance();
+//                    gameFragment.setGameID(gameId);
+//                    transaction.replace(R.id.game_content_frame,gameFragment).commit();
 
-                    GameFragment gameFragment = GameFragment.getInstance();
-                    gameFragment.setGameID(gameId);
-                    transaction.replace(R.id.game_content_frame,gameFragment).commit();
+
+
+                    GameFragment.getInstance().restart();
                 }
             }
         });

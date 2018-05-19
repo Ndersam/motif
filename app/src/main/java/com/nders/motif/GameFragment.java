@@ -96,7 +96,8 @@ public class GameFragment extends Fragment implements GameView.GameOverListener{
     public void onPause() {
         super.onPause();
         //mSoundHelper.pauseMusic();
-        if(GameView.getInstance(getContext()) != null) GameView.getInstance(getContext()).pause();
+        if(GameView.getInstance(getContext()) != null)
+            GameView.getInstance(getContext()).pause();
         super.onPause();
     }
 
@@ -155,5 +156,13 @@ public class GameFragment extends Fragment implements GameView.GameOverListener{
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.replace(R.id.game_content_frame, levelCompleteMenu).commit();
 
+    }
+
+    public void restart(){
+        GameView.quitInstance();
+        onDestroyView();
+        FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+        transaction.replace(R.id.game_content_frame, GameFragment.getInstance()).commit();
+        GameView.getInstance(getContext()).resume();
     }
 }
