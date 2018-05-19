@@ -182,10 +182,10 @@ public class LevelDatabaseHelper extends SQLiteOpenHelper {
                 ContentValues values = new ContentValues();
 
                 //values.put(COLUMN_ID, levelObj.getInt("mId"));
-                Log.i(TAG, "ID " + levelObj.getInt("mId"));
+                Log.i(TAG, "ID " + levelObj.getInt("id"));
                 values.put(COLUMN_UNLOCKED, levelObj.getBoolean("unlocked"));
                 values.put(COLUMN_HIGHSCORE, levelObj.getInt("highscore"));
-                values.put(COLUMN_MOVES, levelObj.getInt("movesLeft"));
+                values.put(COLUMN_MOVES, levelObj.getInt("moves"));
 
                 values.put(COLUMN_RED, colors.getInt(0));
                 values.put(COLUMN_ORANGE , colors.getInt(1));
@@ -220,11 +220,12 @@ public class LevelDatabaseHelper extends SQLiteOpenHelper {
 //                " WHERE " + COLUMN_ID + " = ?";
 
         String query = "SELECT * FROM " + TABLE_LEVELS + " WHERE " + COLUMN_ID + " == " + id + ";";
-        Log.i(TAG, db.getPath());
+        String q = "SELECT * FROM " + TABLE_LEVELS + " WHERE " + COLUMN_ID + " == ?;";
+//        Log.i(TAG, db.getPath());
 
         Level level = null;
         try{
-//            cursor = db.rawQuery(query, new String[]{String.valueOf(mId)});
+//            cursor = db.rawQuery(q, new String[]{String.valueOf(id)});
             cursor = db.rawQuery(query, null);
             if(cursor.moveToFirst()){
                 boolean unlocked = cursor.getInt(KEY_UNLOCKED) > 0;
@@ -237,6 +238,7 @@ public class LevelDatabaseHelper extends SQLiteOpenHelper {
                     map.put(values[j], cursor.getInt(i));
                 }
 
+                Log.i(TAG, "I GOT HERE");
                 level = new Level(id, unlocked, highscore, moves, map);
             }
         }catch (Exception e){
@@ -247,10 +249,8 @@ public class LevelDatabaseHelper extends SQLiteOpenHelper {
             }
         }
 
+        if(level !=  null)
+            Log.i(TAG, level.toString());
         return level;
-    }
-
-    public void createDatabase(){
-
     }
 }

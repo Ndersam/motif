@@ -14,25 +14,17 @@
 
     <!-- About Page -->
     <string name="about_description">
-
-
-        <p>
-            Motif is puzzle game about connecting dots. It is part of a research project developed
-            at the City University of Hong Kong.
-        </p>
-
-        <p>
+        Motif is puzzle game about connecting dots.\n\nIt is part of a research project developed
+        by the City University of Hong Kong, Department of Computer Science.
+    </string>
+    <string name="about_description_more">
         Motif brings to life the data collated from a research. The data is akin to a social network.
         There are nodes (people in a social network) and numerical values, known as edges, that represent the strength
         of relationship between the nodes.
         Each node has a numerical value associated with it. This value correlates with the presence of certain quality.
         The nodes have divided into seven based on the this value. The groups are the seven colors of the rainbow,
         with red representing the values in the top 13% and violet representing values in the bottom 13%.
-        </p>
-        <p>
-            The objective of the game is to connect as many types of dots as possible.
-        </p>
-
+        \nThe objective of the game is to connect as many types of dots as possible.
     </string>
 
     <string name="about_version">Version 1.0</string>

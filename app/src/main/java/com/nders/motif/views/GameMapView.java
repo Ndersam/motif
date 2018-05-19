@@ -4,16 +4,19 @@ package com.nders.motif.views;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.Picture;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.TextPaint;
@@ -24,6 +27,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.nders.motif.Constants;
+import com.nders.motif.R;
 import com.nders.motif.entities.Circle;
 import com.nders.motif.levels.Level;
 
@@ -57,12 +61,12 @@ public class GameMapView extends View {
     private int mMapWidth = 1440;
 
     // COLORS
-    private final int BACKGROUND_COLOR = Color.parseColor("#DF8E57");
-    private final int PATH_COLOR = Color.parseColor("#B16248");
-    private final int SHADOW_COLOR = Color.parseColor("#CC703E");
+    private final int BACKGROUND_COLOR = Color.parseColor("#324056") ;//Color.parseColor("#DF8E57");
+    private final int PATH_COLOR = Color.WHITE;//Color.parseColor("#B16248");
+    private final int SHADOW_COLOR =  Color.parseColor("#202020") ;//Color.parseColor("#CC703E");
     private final int LOCKED_COLOR = Color.parseColor("#EDD7B0");
     private final int TEXT_COLOR = Color.parseColor("#8A3F3C"); //AC5F47
-    private final int UNLOCKED_COLOR = Color.parseColor("#D77D4B");
+    private final int UNLOCKED_COLOR = Color.parseColor("#ffb732") ;//Color.parseColor("#D77D4B");
 
     private static final String TAG = GameMapView.class.getSimpleName();
 
@@ -70,22 +74,14 @@ public class GameMapView extends View {
     *  EVENT
     */
     private List<Circle> mLocations = new ArrayList<>();
-    private List<Level> mGameLevels = new ArrayList<>();
-    private Level mLevelSelected = null;
     private int mScrollOffset = 0;
 
     Rect src;
     Rect dst;
 
-     /*
-    *   Game Level data
-     */
-     private int mHighestUnlockedLevel;
-
-
     /*
     *  LISTENER
-     */
+    */
     private GameListener mGameListener = null;
     private GestureDetector mGestureDetector;
 
@@ -278,7 +274,7 @@ public class GameMapView extends View {
 
         // level 1
         mLocations.add(new Circle(leftRect.left + RECT_WIDTH /2 + RECT_WIDTH, leftRect.bottom, RADIUS, level));
-        //mGameLevels.add(new Level(level, new Location(leftRect.left + RECT_WIDTH /2 + RECT_WIDTH, leftRect.bottom, RADIUS_SMALL)));
+
 
         // levels 2 - 22
         for(int i = 0; i < 7; i++){
@@ -293,13 +289,12 @@ public class GameMapView extends View {
 
             level++;
             mLocations.add(new Circle(leftRect.left + 50, leftRect.bottom - RECT_HEIGHT /2, RADIUS, level));
-            //mGameLevels.add(new Level(level, new Location(leftRect.left + 50, leftRect.bottom - RECT_HEIGHT /2, RADIUS_SMALL)));
+
             level++;
             mLocations.add(new Circle(leftRect.right + RECT_WIDTH /4, rightRect.bottom, RADIUS, level));
-            //mGameLevels.add(new Level(level, new Location(leftRect.right + RECT_WIDTH /4, rightRect.bottom, RADIUS_SMALL)));
+
             level++;
             mLocations.add(new Circle(rightRect.right - RECT_WIDTH /8, rightRect.top + 50, RADIUS, level));
-            //mGameLevels.add(new Level(level, new Location(rightRect.right - RECT_WIDTH /8, rightRect.top + 50, RADIUS_SMALL)));
 
             leftRect.offset(0, - RECT_HEIGHT *2);
             rightRect.offset(0, -RECT_HEIGHT *2);
@@ -367,7 +362,6 @@ public class GameMapView extends View {
         // draw circles
         level = 0;
         for(Circle location : mLocations){
-            //Location location = gameLevel.getLocation();
 
             mCanvas.drawCircle(location.centreX() - 25, location.centreY() + 25, RADIUS, mShadowPaint);
             mCanvas.drawCircle(location.centreX(), location.centreY(), RADIUS, mWhitePaint);
@@ -375,6 +369,16 @@ public class GameMapView extends View {
                 mCirclePaint.setColor(UNLOCKED_COLOR);
                 mCanvas.drawCircle(location.centreX(), location.centreY(), RADIUS - RING_WIDTH, mCirclePaint);
                 mCirclePaint.setColor(LOCKED_COLOR);
+
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inScaled = false;
+                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+
+                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.star, options);
+                float x = location.left();
+                float y = location.top() - bmp.getHeight()*.75f;
+                mCanvas.drawBitmap(bmp, location.left(), y, null);
+
             }else{
                 mCanvas.drawCircle(location.centreX(), location.centreY(), RADIUS - RING_WIDTH, mCirclePaint);
             }
@@ -382,7 +386,6 @@ public class GameMapView extends View {
             mCanvas.drawText(String.valueOf(++level), location.centreX(), location.centreY() + 40, mTextPaint);
         }
     }
-
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
     //

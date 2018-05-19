@@ -1,162 +1,173 @@
-<ScrollView
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent"
+    android:orientation="vertical"
     tools:context="com.nders.motif.AboutFragment">
 
-    <LinearLayout
+    <!-- tag -->
+    <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_marginTop="16dp">
 
-        <!-- tag -->
-        <RelativeLayout
+        <TextView
+            android:layout_centerInParent="true"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp">
-
-            <TextView
-                android:layout_centerInParent="true"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:textStyle="bold"/>
-
-            <ImageView
-                android:id="@+id/about_back_btn"
-                android:layout_alignParentTop="true"
-                android:layout_marginStart="16dp"
-                android:layout_marginEnd="8dp"
-                android:layout_width="32dp"
-                android:layout_height="32dp"
-                android:background="@drawable/back_button"
-                android:scaleType="fitCenter"
-                android:clickable="true"
-                android:focusable="true"/>
+            android:gravity="center"
+            android:textStyle="bold"
+            android:text="MOTIF"
+            android:textSize="20sp"/>
 
 
-        </RelativeLayout>
-
-
-        <!-- Information -->
         <ImageView
-            android:layout_width="wrap_content"
-            android:layout_height="200dp" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAllCaps="false"
-            android:text="@string/about_description"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"/>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
-
-        <!-- Version -->
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="@string/about_version"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
+            android:id="@+id/about_back_btn"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="16dp"
+            android:layout_marginEnd="8dp"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:background="@drawable/back_button"
+            android:scaleType="fitCenter"
             android:clickable="true"
-            android:focusable="true"
-            android:gravity="center_vertical|start"/>
+            android:focusable="true"/>
 
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
 
-        <!-- Play Store link -->
+
+    </RelativeLayout>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center">
+            android:orientation="vertical">
 
+            <!-- Information -->
             <ImageView
                 android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"/>
+                android:layout_height="200dp" />
 
             <TextView
-                android:id="@+id/about_playstore"
                 android:layout_width="match_parent"
-                android:layout_height="40dp"
-                android:text="@string/about_playstore_remark"
-                android:gravity="center_vertical|start"/>
-        </LinearLayout>
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
-        <!-- Github Link -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center">
-
-            <ImageView
-                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginEnd="4dp"/>
+                android:textAllCaps="false"
+                android:text="@string/about_description"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"/>
 
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+
+
+            <!-- Version -->
             <TextView
-                android:id="@+id/about_github"
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
-                android:text="@string/about_github_remark"
+                android:text="@string/about_version"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
                 android:gravity="center_vertical|start"/>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+
+            <!-- Play Store link -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"/>
+
+                <TextView
+                    android:id="@+id/about_playstore"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:text="@string/about_playstore_remark"
+                    android:gravity="center_vertical|start"/>
+            </LinearLayout>
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+
+            <!-- Github Link -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center">
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="4dp"/>
+
+                <TextView
+                    android:id="@+id/about_github"
+                    android:layout_width="match_parent"
+                    android:layout_height="40dp"
+                    android:text="@string/about_github_remark"
+                    android:gravity="center_vertical|start"/>
+            </LinearLayout>
+
+
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"/>
+
+            <!-- Copyright Info -->
+            <TextView
+                android:id="@+id/about_copyright"
+                android:layout_width="match_parent"
+                android:layout_height="40dp"
+                android:text="@string/about_copyright"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="2dp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"/>
+
         </LinearLayout>
+    </ScrollView>
 
 
-
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="1dp"
-            android:background="@android:color/darker_gray"/>
-
-        <!-- Copyright Info -->
-        <TextView
-            android:id="@+id/about_copyright"
-            android:layout_width="match_parent"
-            android:layout_height="40dp"
-            android:text="@string/about_copyright"
-            android:layout_marginTop="2dp"
-            android:layout_marginBottom="2dp"
-            android:paddingStart="8dp"
-            android:paddingEnd="8dp"
-            android:clickable="true"
-            android:focusable="true"
-            android:gravity="center"/>
-
-    </LinearLayout>
-</ScrollView>
+</LinearLayout>
 
 
