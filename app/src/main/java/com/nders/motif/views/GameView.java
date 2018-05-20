@@ -14,6 +14,7 @@ import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
+import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -33,6 +34,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 
 
@@ -596,7 +598,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     }
 
 
-    public synchronized void onActionUp(){
+    private synchronized void onActionUp(){
 
         // If no two dots have been connected, return
         if(mSelectedDots.size() <= 1 || mLines.empty()){
@@ -604,372 +606,194 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             return;
         }
 
+        // Update score info
+        mGameLevel.updateScore(mSelectedDotColor, mSelectedDots.size());
+
         Canvas canvas = mSurfaceHolder.lockCanvas(null);
 
-        //////////////////////////
+        // Stores in a map the number of selected dots per column
+        SparseIntArray dotsPerColumn = new SparseIntArray(mSelectedDots.size());
+
+
+
+        //////////////////////////////////////
         //
-        // STEP 1: RESET SURFACE
+        // STEP 1: CLEAR "SELECTED" DOTS
         //
-        //////////////////////////
+        ///////////////////////////////////////
 
         // Redraw Rectangles
         canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
         for(List<Rectangle> rectRow: mRectangles){
             for(Rectangle rect: rectRow){
-                mColorPaint.setColor(rect.dotColor().colorInfo());
-                canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
+                // only draw unselected dots
+                if(!rect.isSelected()){
+                    mColorPaint.setColor(rect.dotColor().colorInfo());
+                    canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
+                }
+                else{
+                    dotsPerColumn.put(rect.column(), 1 + dotsPerColumn.get(rect.column(), 0));
+                }
             }
         }
+
         // Redraw Header and Footer
         drawHeaderAndFooter(canvas);
 
+        // Post new drawing
         mSurfaceHolder.unlockCanvasAndPost(canvas);
-        Log.i(TAG,"SELECTED DOTS: " + mSelectedDots.size());
 
 
-//        try {
-//            Thread.sleep(TIME_DELAY*200);
-//        }catch (InterruptedException e){
-//            e.printStackTrace();
-//        }
         System.out.print("\n------------PHASE 1----------------\n");
         printRects();
-
-        /////////////////////////////////////////////////////////////////
-        //
-        // STEP 2:  ERASE SELECTED DOTS AND MOVE UNSELECTED DOTS THAT ...
-        //          ... APPEAR ABOVE SELECTED DOTS DOWNWARDS
-        //
-        ////////////////////////////////////////////////////////////////
-
-
-        // For every column, search upwards for selected dots.
-        // For every selected dot found, swap with the nearest unselected dot found
-        // Iterate until no unselected dot appears above a selected dot.
-
-        synchronized (mRectangles){
-
-            /*
-                Algorithm.
-                ----------
-                starting from the second to the last row,...
-                For every row, i{
-                    For every column, j, in i{
-
-                        If dot in position (i,j), is unselected
-                        and find the lowest selected dot below it   {
-                            if any found : => swap dots
-                        }
-
-                    }
-                }
-
-             */
-//
-//
-//            for(int rowIdx = 1; rowIdx < MAX_ROW_COUNT; rowIdx++){
-//
-//                // Dots in row currently examined
-//                List<Rectangle> currentRow = mRectangles.get(rowIdx);
-//
-//
-//
-//                for(int colIdx = 0; colIdx < MAX_COLUMN_COUNT; colIdx++){
-//                    Rectangle currentDot = currentRow.get(colIdx);
-//                    int rectID = currentDot.mId();
-//
-//                    // If current dot is unselected
-//                    if(!currentDot.isSelected()){
-//                        int targetRow = rowIdx;
-//                        boolean rowFound = false;
-//
-//                        // find the next unselected dot (rectangle)
-//                        while (--targetRow >= 0 ) {
-//                            if (mRectangles.get(targetRow).get(colIdx).isSelected()){
-//                                rowFound = true;
-//                                break;
-//                            }
-//                        }
-//
-//                        if(rowFound){
-//                            List<Rectangle> bottomRow = mRectangles.get(targetRow);
-//
-//                            // Selected dot to be swapped
-//                            Rectangle bottomDot= bottomRow.get(colIdx);
-//
-//                            Rect currentRect = new Rect(
-//                                    (int)(currentDot.left() - RECT_TOLERANCE - HORIZONTAL_SPACING/2),
-//                                    (int)(currentDot.top() - RECT_TOLERANCE - VERTICAL_SPACING/2),
-//                                    (int)(currentDot.right() + RECT_TOLERANCE+ HORIZONTAL_SPACING/2),
-//                                    (int)(currentDot.bottom()  + RECT_TOLERANCE+ VERTICAL_SPACING/2)
-//                            );
-//
-//                            Rect bottomRect = new Rect(
-//                                    (int)(bottomDot.left() - RECT_TOLERANCE - HORIZONTAL_SPACING/2),
-//                                    (int)(bottomDot.top() - RECT_TOLERANCE - VERTICAL_SPACING/2),
-//                                    (int)(bottomDot.right() + RECT_TOLERANCE+ HORIZONTAL_SPACING/2),
-//                                    (int)(bottomDot.bottom()  + RECT_TOLERANCE+ VERTICAL_SPACING/2)
-//                            );
-//
-//
-//
-//                            // CLEAR PREVIOUS LOCATION (OF TOP-UNSELECTED DOT)
-//                            canvas = mSurfaceHolder.lockCanvas(currentRect);
-//                            canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_OVER);
-//                            mSurfaceHolder.unlockCanvasAndPost(canvas);
-//
-//                            try {
-//                                Thread.sleep(5);
-//                            }catch (InterruptedException e){
-//                                e.printStackTrace();
-//                            }
-//
-//
-//
-//                            // DRAW DOT AT NEW POSITION
-//                            mColorPaint.setColor(currentDot.dotColor().colorInfo());
-//                            canvas = mSurfaceHolder.lockCanvas(bottomRect);
-//                            canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_OVER);
-//                            canvas.drawCircle(bottomDot.getX(), bottomDot.getY(), RADIUS, mColorPaint);
-//                            mSurfaceHolder.unlockCanvasAndPost(canvas);
-//                            ///////////////////////////////////////////////////////////////
-//
-//                            // Swap attributes
-//                            currentDot.swap(bottomDot);
-//
-//
-//                            // ADD TO LIST TO BE UPDATED
-//                            mDotsToBeUpdated.put(rectID, bottomDot);
-//
-//                            currentRow.set(colIdx, bottomDot);
-//                            mRectangles.set(targetRow, currentRow);
-//                        }
-//                    }
-//
-//
-//                }
-//            }
-            List<Rectangle> markedDots = new ArrayList<>();
-
-            for(int colIdx = 0; colIdx < MAX_COLUMN_COUNT; colIdx++){
-                // NOTE
-                // The row order is in reverse
-                // The last row displayed on the GUI is the first row in the ...
-                // ... mRectangles list.
-                for(int rowIdx = 0; rowIdx < MAX_ROW_COUNT ; rowIdx++){
-                    List<Rectangle> rectRow = mRectangles.get(rowIdx); // row list
-
-                    Rectangle rect = rectRow.get(colIdx);
-
-                    // skip rectangles not selected
-                    if(!rect.isSelected()) continue;
-
-                    // Params of Rectangle (Dot) to be updated
-                    int rectID = rect.id();  // mId to be removed
-
-                    Rect bottomRect = new Rect(
-                            (int)(rect.left() - RECT_TOLERANCE - HORIZONTAL_SPACING/2),
-                            (int)(rect.top() - RECT_TOLERANCE - VERTICAL_SPACING/2),
-                            (int) (rect.right() + RECT_TOLERANCE+ HORIZONTAL_SPACING/2),
-                            (int)(rect.bottom()  + RECT_TOLERANCE+ VERTICAL_SPACING/2)
-                    );
-
-                    int rowInCheck = rowIdx;
-
-                    // find the next unselected dot (rectangle)
-                    while (++rowInCheck < MAX_ROW_COUNT && mRectangles.get(rowInCheck).get(colIdx).isSelected()) ;
-
-
-                    // if something was found
-                    // if rect is not on the top row
-                    // if (rowInCheck < MAX_ROW_COUNT && !(mRectangles.get(rowInCheck).get(colIdx).isMarked())) {
-                    if (rowInCheck < MAX_ROW_COUNT ) {
-                        // upper unselected rectangle
-                        // still a black dot
-                        List<Rectangle> upperRectRow = mRectangles.get(rowInCheck);
-                        Rectangle topUnselected = upperRectRow.get(colIdx);
-
-                        //////////////////////////////////////////////////////////////
-                        Rect topRect = new Rect(
-                                (int)(topUnselected.left() - RECT_TOLERANCE -HORIZONTAL_SPACING/2),
-                                (int)(topUnselected.top() - RECT_TOLERANCE - VERTICAL_SPACING/2),
-                                (int)(topUnselected.right() + RECT_TOLERANCE+ HORIZONTAL_SPACING/2),
-                                (int)(topUnselected.bottom() + RECT_TOLERANCE+ VERTICAL_SPACING/2)
-                        );
-
-                        // CLEAR PREVIOUS LOCATION (OF TOP-UNSELECTED DOT)
-                        canvas = mSurfaceHolder.lockCanvas(topRect);
-                        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_OVER);
-                        //canvas.drawRect(topRect, mWhitePaint);
-                        mSurfaceHolder.unlockCanvasAndPost(canvas);
-
-                        try {
-                            Thread.sleep(0);
-                        }catch (InterruptedException e){
-                            e.printStackTrace();
-                        }
-
-                        // DRAW DOT AT NEW POSITION
-                        mColorPaint.setColor(topUnselected.dotColor().colorInfo());
-                        canvas = mSurfaceHolder.lockCanvas(bottomRect);
-                        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_OVER);
-                        canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
-                        mSurfaceHolder.unlockCanvasAndPost(canvas);
-                        ///////////////////////////////////////////////////////////////
-
-                        // SWAP IDs
-                        rect.swap(topUnselected);
-                        markedDots.add(rect);
-
-                        // ADD TO LIST TO BE UPDATED
-                        mDotsToBeUpdated.put(rectID, topUnselected);
-
-                        upperRectRow.set(colIdx, topUnselected);
-                        mRectangles.set(rowInCheck, upperRectRow);
-                    }else{
-
-                        mDotsToBeUpdated.put(rectID, rect);
-
-                        // ERASE DOT
-                        canvas = mSurfaceHolder.lockCanvas(bottomRect);
-                        canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
-                        mSurfaceHolder.unlockCanvasAndPost(canvas);
-                    }
-                    rectRow.set(colIdx, rect);
-                    mRectangles.set(rowIdx, rectRow);
-                }
-            }//////////////////////////// end for every column block
-
-//            Collections.sort(markedDots, Rectangle.rowComparator());
-//
-//            int i = 0, len = markedDots.size();
-//
-//            while(i < len){
-//                int j = i+1;
-//                while(j < len && (markedDots.get(i).row() == markedDots.get(j).row())){
-//                    j++;
-//                }
-//
-//
-//                System.out.println("diff: " + (j - i));
-//                for(int k = i; k < j; k++){
-//                    Rect rect = new Rect(
-//                            (int)(markedDots.get(k).left() - RECT_TOLERANCE - HORIZONTAL_SPACING/2),
-//                            (int)(markedDots.get(k).top() - RECT_TOLERANCE - VERTICAL_SPACING/2),
-//                            (int)(markedDots.get(k).right() + RECT_TOLERANCE+ HORIZONTAL_SPACING/2),
-//                            (int)(markedDots.get(k).bottom()  + RECT_TOLERANCE+ VERTICAL_SPACING/2)
-//                    );
-//                    System.out.println(markedDots.get(k).row() + ", " + markedDots.get(k).column());
-//                    canvas = mSurfaceHolder.lockCanvas(rect);
-//                    canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_OVER);
-//                    mColorPaint.setColor(markedDots.get(k).dotColor().colorInfo());
-//                    canvas.drawCircle(markedDots.get(k).getX(), markedDots.get(k).getY(), RADIUS, mColorPaint);
-//                    mSurfaceHolder.unlockCanvasAndPost(canvas);
-//                }
-//                i = j;
-//
-//                try {
-//                    Thread.sleep(TIME_DELAY*8);
-//                }catch (InterruptedException e){
-//                    e.printStackTrace();
-//                }
-//            }
+        Log.i(TAG,"SELECTED DOTS: { " + mStartRect.dotColor().toString() + ", " + mSelectedDots.size() + " }");
+        try {
+            Thread.sleep(TIME_DELAY);
+        }catch (InterruptedException e){
+            e.printStackTrace();
         }
 
 
 
+        /////////////////////////////////////////////
+        //
+        // STEP 2: ANIMATE "UNSELECTED" DOTS FALLING
+        //
+        ////////////////////////////////////////////
 
-        //==================================================================================
-        // ADD NEW NODES
-        //==================================================================================
+        boolean done = false;
+        while(!done){
+            done = true;
+
+            // Bubble "selected" dots upwards
+            for(int i = 0; i < dotsPerColumn.size(); i++){
+                int column = dotsPerColumn.keyAt(i);
+                for(int row = 1; row < MAX_ROW_COUNT; row++){
+                    // if the above dot is unselected and the one below in selected
+                    if( !mRectangles.get(row).get(column).isSelected() && mRectangles.get(row - 1).get(column).isSelected()){
+                        Rectangle.swap(mRectangles.get(row).get(column),  mRectangles.get(row - 1).get(column));
+                        done = false;
+                    }
+                }
+            }
+
+            // Update UI
+            if(!done){
+                canvas = mSurfaceHolder.lockCanvas(null);
+                canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
+
+                for(List<Rectangle> rectRow: mRectangles){
+                    for(Rectangle rect: rectRow){
+                        // only draw unselected dots
+                        if(!rect.isSelected()){
+                            mColorPaint.setColor(rect.dotColor().colorInfo());
+                            canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
+                        }
+                    }
+                }
+                // Redraw Header and Footer
+                drawHeaderAndFooter(canvas);
+                mSurfaceHolder.unlockCanvasAndPost(canvas);
+
+                try {
+                    Thread.sleep(TIME_DELAY);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
 
         System.out.print("\n------------PHASE 2 ----------------\n");
         printRects();
-//        try {
-//            Thread.sleep(TIME_DELAY*200);
-//        }catch (InterruptedException e){
-//            e.printStackTrace();
-//        }
-
-
-        // Update Header and Footer Information
-        // Information includes number of movesLeft left, int_score and number of dots left
-        canvas = mSurfaceHolder.lockCanvas(null);
-        drawHeaderAndFooter(canvas);
-        mSurfaceHolder.unlockCanvasAndPost(canvas);
-
-        synchronized (mDotsToBeUpdated){
-            // SORT
-            ArrayList<Rectangle> tempList = new ArrayList<>(mDotsToBeUpdated.size());
-            for(int i = 0, count = mDotsToBeUpdated.size(); i < count; i++){
-
-                mDeletedNodes.add(mDotsToBeUpdated.valueAt(i).toDotNode());
-                tempList.add(mDotsToBeUpdated.valueAt(i));
-
-                // update dotColorCounter
-                mDotColorCounter.put( mDotsToBeUpdated.valueAt(i).dotColor(),
-                       mDotColorCounter.get( mDotsToBeUpdated.valueAt(i).dotColor()) - 1);
-
-            }
-            Collections.sort(tempList, Rectangle.rowComparator());
-
-
-            for(int idx = 0, len = tempList.size(); idx < len; idx++){
-                Rectangle rect = tempList.get(idx);
-                DotNode node = getNewNode();
-                rect.deselect();
-                rect.setId(node.id);
-                rect.setDotColor(DotColor.valueOf(node.degree));
-
-                ///////////////////////////////////////////////
-                mColorPaint.setColor(rect.dotColor().colorInfo());
-                Rect dirtyRect;
-                float centreX = rect.getX();
-                float startY = rect.getAnimY();
-                while(rect.step()){
-                    float centreY = rect.getAnimY();
-
-                    dirtyRect = new Rect((int)(centreX - RADIUS - HORIZONTAL_SPACING/2),
-                            (int)(startY - RADIUS - VERTICAL_SPACING/2),
-                            (int)(centreX + RADIUS + HORIZONTAL_SPACING/2),
-                            (int)(centreY + RADIUS + VERTICAL_SPACING/2) );
-                    canvas = mSurfaceHolder.lockCanvas(dirtyRect);
-                    canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_OVER);
-                    canvas.drawCircle(rect.getX(), rect.getAnimY(), RADIUS, mColorPaint);
-                    mSurfaceHolder.unlockCanvasAndPost(canvas);
-
-                    startY = rect.getAnimY();
-                    try {
-                        Thread.sleep(0);
-                    }catch (InterruptedException e){
-                        e.printStackTrace();
-                    }
-                }
-                dirtyRect = new Rect((int)(centreX - RADIUS - HORIZONTAL_SPACING/2), (int)(startY - RADIUS - VERTICAL_SPACING/2),
-                        (int)(centreX + RADIUS + HORIZONTAL_SPACING/2), (int)(rect.getY() + RADIUS + VERTICAL_SPACING/2) );
-                canvas = mSurfaceHolder.lockCanvas(dirtyRect);
-                canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC_OVER);
-
-                try {
-                    Thread.sleep(2);
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-                canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
-                mSurfaceHolder.unlockCanvasAndPost(canvas);
-                //////////////////////////////////////////////////
-            }
+        try {
+            Thread.sleep(TIME_DELAY*2);
+        }catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
 
-        Log.i(TAG, mStartRect.dotColor().toString());
-        mGameLevel.updateScore(mSelectedDotColor, mSelectedDots.size());
+        /////////////////////////
+        //
+        // ADD NEW DOTS
+        //
+        /////////////////////////
 
-        // Reset state
+        done = false;
+        while(!done){
+            done = true;
+            // Add new dots
+            // ... bubble them downwards
+            for(int i = 0; i < dotsPerColumn.size(); i++){
+                int column = dotsPerColumn.keyAt(i);
+                int count = dotsPerColumn.get(column, 0);
+
+                if (count > 0){
+                    int row = MAX_ROW_COUNT - 1;
+                    // find the next selected dot
+                    while(row >= 0 && !mRectangles.get(row).get(column).isSelected()){
+                        row--;
+                    }
+
+                    if(row >= 0){
+
+                        // bubble upwards, "selected" dot found at row, "row"
+                        for(int j = row; j < MAX_COLUMN_COUNT - 1; j++){
+                            Rectangle.swap(mRectangles.get(j).get(column),  mRectangles.get(j + 1).get(column));
+                        }
+                        dotsPerColumn.put(column, count--);
+
+                        // add new dot
+                        Rectangle rect = mRectangles.get(MAX_ROW_COUNT - 1).get(column);
+                        DotNode node = getNewNode();
+                        rect.deselect();
+                        rect.setId(node.id);
+                        rect.setDotColor(DotColor.valueOf(node.degree));
+                        done = false;
+                    }
+                }
+            }
+
+
+            // Update UI
+            if(!done){
+                canvas = mSurfaceHolder.lockCanvas(null);
+                canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
+
+                for(List<Rectangle> rectRow: mRectangles){
+                    for(Rectangle rect: rectRow){
+                        // only draw unselected dots
+                        if(!rect.isSelected()){
+                            mColorPaint.setColor(rect.dotColor().colorInfo());
+                            canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
+                        }
+                    }
+                }
+                // Redraw Header and Footer
+                drawHeaderAndFooter(canvas);
+                mSurfaceHolder.unlockCanvasAndPost(canvas);
+
+                try {
+                    Thread.sleep(TIME_DELAY);
+                }catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+
+        }
+
+
+        System.out.print("\n------------PHASE 3 ----------------\n");
+        printRects();
+//        try {
+//            Thread.sleep(TIME_DELAY*200);
+//        }catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+
         mState = STATE.RESET;
     }
 
-    public synchronized void onActionMove(){
+    private synchronized void onActionMove(){
         Canvas canvas = mSurfaceHolder.lockCanvas(null);
         canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
 
@@ -1020,7 +844,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         mSurfaceHolder.unlockCanvasAndPost(canvas);
     }
 
-    public synchronized void onActionReset(){
+    private synchronized void onActionReset(){
 
         Canvas canvas = mSurfaceHolder.lockCanvas(null);
         canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
