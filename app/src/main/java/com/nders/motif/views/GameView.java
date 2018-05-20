@@ -13,7 +13,6 @@ import android.graphics.Rect;
 import android.support.annotation.NonNull;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.MotionEvent;
 import android.view.SurfaceHolder;
@@ -34,7 +33,6 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 
 
@@ -81,6 +79,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     protected static final float VERTICAL_PADDING = 16;
 
     protected static final int SCORE_TEXT_DIM = 300;
+
+
+    protected static int LINE_THRESHOLD;
 
 
     /**
@@ -161,9 +162,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // ... that appear above them and have not been selected (connected).
     // This occurs if and only if the size of the container is greater than one.
     protected Stack<Rectangle> mSelectedDots;
-
-    // Stores all the dots that are to been removed.
-    protected SparseArray<Rectangle> mDotsToBeUpdated;
 
 
     /**
@@ -253,6 +251,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // This is used for ensuring the an optimum number of particular colors are present.
     // This varies with the game level.
     protected EnumMap<DotColor, Integer> mDotColorCounter = new EnumMap<>(DotColor.class);
+
+    protected boolean mIsDrawing = false;
 
     // The current game int_score.
     protected int mGameScore = 0;
@@ -381,7 +381,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         mCircles = new ArrayList<>();
         mLines = new Stack<>();
         mSelectedDots = new Stack<>();
-        mDotsToBeUpdated = new SparseArray<Rectangle>();
+
 
         // Data Loader
         mDataLoader = new Loader(context,36);
@@ -454,10 +454,12 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         return true;
     }
 
+
     private void onTouchEventLine(MotionEvent event) {
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 // First touch. Store the initial point
+                mIsDrawing = true;
                 mStartX = mx;
                 mStartY = my;
                 for(List<Rectangle> list: mRectangles){
@@ -485,6 +487,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 if(mStartRect == null){
                     break;
                 }
+                if(!mIsDrawing){
+                    mState = STATE.MOVING;
+                    break;
+                }
+
                 for(List<Rectangle> list: mRectangles){
                     for(Rectangle rect: list){
                         //==============================================================
@@ -497,20 +504,22 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                             mx = rect.getX();
                             my = rect.getY();
 
-                            if(mStartRect != null ){
-                                if(rect.id() != mStartRect.id()){
-                                    if(mDataLoader.checkEdge(mStartRect.id(), rect.id(), mEdges)) {
-                                        //==============================================================
-                                        // IF LINE TO BE DRAWN IS NON-DIAGONAL
-                                        //==============================================================
-                                        if (mx == mStartX || my == mStartY) {
-                                            //Log.i(TAG, "TOUCHED: " + rect.mId());
-                                            // new line to be added
-                                            Line line = new Line(mStartX, mStartY, mx, my);
+                            // rect.id() != mStartRect.id() &&
+                            if(!rect.isSelected()){
+                                if(mDataLoader.checkEdge(mStartRect.id(), rect.id(), mEdges)) {
+                                    //=========================================================
+                                    // IF LINE TO BE DRAWN IS NON-DIAGONAL
+                                    //=========================================================
+                                    if (mx == mStartX || my == mStartY) {
+                                        //Log.i(TAG, "TOUCHED: " + rect.mId());
+                                        // new line to be added
+                                        Line line = new Line(mStartX, mStartY, mx, my);
+                                        line.startId = mSelectedDots.peek().id();
+                                        line.endId = rect.id();
 
-                                            //==============================================================
-                                            // BACKTRACK (IF CONDITION IS MEANT)
-                                            //==============================================================
+                                        //========================================================
+                                        // BACKTRACK (IF CONDITION IS MEANT)
+                                        //========================================================
 //                                        if (mLines.size() > 0) {
 //                                            double distFrom2ndLastDot =
 //                                                    Math.sqrt(Math.pow(mLines.peek().startX - mx_raw, 2) +
@@ -534,54 +543,109 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 //                                            }
 //                                        }
 
+                                        //==========================================================
+                                        // ADD NEW LINE
+                                        //==========================================================
+
+                                        // Add new line iff the line (to be drawn) connects
+                                        // only adjacent dots
+
+                                        // The sum, (VERTICAL_SPACING + 2*RADIUS), is the maximum
+                                        // distance between the centres of two adjacent dots
+
+                                        if (line.length() <= (VERTICAL_SPACING + 2 * RADIUS)){
+
                                             //==========================================================
-                                            // ADD NEW LINE
+                                            // IF RECTANGLE HASN'T BEEN CONNECTED
                                             //==========================================================
+                                            if (!rect.isSelected()) {
+                                                mLines.push(line);
+                                                mStartX = mx;
+                                                mStartY = my;
 
-                                            // Add new line iff the line (to be drawn) connects
-                                            // only adjacent dots
-
-                                            // The sum, (VERTICAL_SPACING + 2*RADIUS), is the maximum
-                                            // distance between the centres of two adjacent dots
-
-                                            if (line.length() <= (VERTICAL_SPACING + 2 * RADIUS)){
-
-                                                //==========================================================
-                                                // IF RECTANGLE HASN'T BEEN CONNECTED
-                                                //==========================================================
-                                                if (!rect.isSelected()) {
-                                                    mLines.push(line);
-                                                    mStartX = mx;
-                                                    mStartY = my;
-
-                                                    // push rectangle onto stack
-                                                    rect.select();
-                                                    mSelectedDots.push(rect);
+                                                // push rectangle onto stack
+                                                rect.select();
+                                                mSelectedDots.push(rect);
 
 //                                                double distFromLastDot = Math.sqrt(Math.pow(mLines.peek().endX - mx_raw, 2) +
 //                                                        Math.pow(mLines.peek().endY - my_raw, 2));
 //                                                if (mOnDrawingPathListener != null && distFromLastDot > (VERTICAL_SPACING / 2)) {
 //                                                    mOnDrawingPathListener.onDotConnected(mSelectedDots.size());
 //                                                }
-                                                }
                                             }
-                                        } //### END IF (LINE TO BE DRAWN IS NON-DIAGONAL)
+                                        }
+                                    } //### END IF (LINE TO BE DRAWN IS NON-DIAGONAL)
+
+                                }
+                            }
+                            else{
+                                //=================================================
+                                // CLOSE PATH
+                                //=================================================
+                                if(mSelectedDots.peek().id() == rect.id()){
+                                    break;
+                                }
+
+                                // if line is non-diagonal
+                                if (mx == mStartX || my == mStartY) {
+
+                                    // new line to be added
+                                    Line line = new Line(mStartX, mStartY, mx, my);
+                                    line.startId = mSelectedDots.peek().id();
+                                    line.endId = rect.id();
+
+                                    // To close a rectangular path 4 lines are needed.
+                                    // If mLines has at least 3 lines, close path
+                                    if(mLines.size() >= 3 && (line.length() <= (VERTICAL_SPACING + 2 * RADIUS))){
+                                        Log.i(TAG, "Line Valid");
+
+                                        List<Line> lines = new ArrayList<>();
+
+                                        int i = mLines.size() - 1;
+                                        Line temp = new Line(mLines.get(i));
+
+                                        Log.i(TAG, String.format("(%03d, %03d)",
+                                                mLines.get(i).startId, mLines.get(i).endId) + " " + mLines.get(i).type());
+
+                                        for(i = mLines.size() - 2; i >= 0; i--){
+
+                                            Log.i(TAG, String.format("(%03d, %03d)",
+                                                    mLines.get(i).startId, mLines.get(i).endId) + " " + mLines.get(i).type());
+
+                                            if(temp.type() == mLines.get(i).type()){
+                                                temp.merge(mLines.get(i));
+                                            }else{
+                                                lines.add(temp);
+                                                temp = new Line(mLines.get(i));
+                                            }
+
+                                            // closed path found
+                                            if(lines.size() >= 3)
+                                                break;
+                                        }
+
+                                        if(i < 0){
+                                            lines.add(temp);
+                                        }
+
+                                        Log.i(TAG, "*********Lines***********");
+                                        for(Line l: lines){
+                                            Log.i(TAG, String.format("(%03d, %03d)",
+                                                    l.startId, l.endId) + " " + l.type());
+                                        }
+                                        if(lines.size() >= 3 && mIsDrawing){
+                                            mLines.push(line);
+                                            mIsDrawing = false;
+                                        }else{
+                                            Log.i(TAG, "Not a Closed Path: " + lines.size());
+                                        }
+                                        Log.i(TAG, "*****************************");
 
                                     }
                                 }
-                                else{
-                                    //==============================================================
-                                    // CLOSE PATH
-                                    //==============================================================
-                                    // To close a rectangular path 4 lines are needed.
-                                    // If mLines has at least 3 lines, close path
-                                    if(mLines.size() >= 3){
-                                        Line line = new Line(mStartX, mStartY, mx, my);
-                                        mLines.push(line);
-                                    }
-                                }
-                                break;
-                            } // END IF (mStartRect != null &&  mOnDrawingPathListener != null )
+                            }
+                            // break if (mx, my) is in rect
+                            break;
                         }
                     }
                 }
@@ -793,6 +857,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         mState = STATE.RESET;
     }
 
+
     private synchronized void onActionMove(){
         Canvas canvas = mSurfaceHolder.lockCanvas(null);
         canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
@@ -831,12 +896,14 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }
         }
 
-
-        if (mStartRect != null && (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) ){
-            canvas.drawLine(mStartX, mStartY, mx, my, mColorPathPaint);
-            last_mx = mx;
-            last_my = my;
+        if(mIsDrawing){
+            if (mStartRect != null && (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) ){
+                canvas.drawLine(mStartX, mStartY, mx, my, mColorPathPaint);
+                last_mx = mx;
+                last_my = my;
+            }
         }
+
 
         drawHeaderAndFooter(canvas);
 
@@ -844,17 +911,17 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         mSurfaceHolder.unlockCanvasAndPost(canvas);
     }
 
+
     private synchronized void onActionReset(){
 
+        //========================
+        // REDRAW UI
+        //========================
         Canvas canvas = mSurfaceHolder.lockCanvas(null);
         canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
 
         drawHeaderAndFooter(canvas);
 
-
-        //=====================================================
-        // REDRAW DOTS
-        //=====================================================
         for(List<Rectangle> rectRow: mRectangles){
             for(Rectangle rect: rectRow){
                 mColorPaint.setColor(rect.dotColor().colorInfo());
@@ -863,26 +930,27 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
         mSurfaceHolder.unlockCanvasAndPost(canvas);
 
-        //=====================================================
+        //===========================
         // RESET
-        //=====================================================
-        Log.i(TAG,"SELECTED DOTS: " + mSelectedDots.size());
-        Log.i(TAG,"UPDATED DOTS: " + mDotsToBeUpdated.size());
+        //===========================
 
+        // DESELECT DOTS
         for(int i = MAX_ROW_COUNT - 1; i >= 0; i--){
             List<Rectangle> list = mRectangles.get(i);
             for(Rectangle rect: list){
                 rect.deselect();
             }
-            System.out.print("\n");
         }
 
-        mDotsToBeUpdated.clear();
+        // DEBUGGING
+        Log.i(TAG, "__________________RESET_______________");
+        Log.i(TAG,"SELECTED DOTS: " + mSelectedDots.size());
+        printRects();
+
         mLines.clear();
         mSelectedDots.clear();
         mStartRect =  null;
         mState = STATE.DO_NOTHING;
-
 
         if(mGameOverListener != null){
             if(mGameLevel.succeeded() || mGameLevel.failed()){
@@ -890,7 +958,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }
         }
 
-        printRects();
     }
 
 
