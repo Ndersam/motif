@@ -18,10 +18,11 @@ public class SoundHelper {
     private MediaPlayer mMusicPlayer;
     private SoundPool mSoundPool;
     private int mErrorSoundID;
-    private int mSuccessSoundID;
+    private int mClickId;
     private boolean mLoaded;
     private float mVolume;
     private SharedPreferences mPrefs;
+
 
     public SoundHelper(Activity activity) {
 
@@ -49,8 +50,8 @@ public class SoundHelper {
                 mLoaded = true;
             }
         });
-        mErrorSoundID = mSoundPool.load(activity, R.raw.bottle_break, 1);
-        mSuccessSoundID = mSoundPool.load(activity, R.raw.positive, 2);
+        mErrorSoundID = mSoundPool.load(activity, R.raw.bottle_break, 2);
+        mClickId = mSoundPool.load(activity, R.raw.multimedia_button_click_021, 1);
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
     }
@@ -84,9 +85,9 @@ public class SoundHelper {
         }
     }
 
-    public void playCorrectSound(){
+    public void playButtonClick(){
         if (mLoaded && mPrefs.getBoolean(Constants.KEY_SOUND_ENABLED, true)) {
-            mSoundPool.play(mSuccessSoundID, mVolume, mVolume, 1, 0, 1f);
+            mSoundPool.play(mClickId, mVolume, mVolume, 1, 0, 1f);
         }
     }
 

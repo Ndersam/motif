@@ -44,6 +44,11 @@ public class SettingsFragment extends Fragment {
         soundControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(progress == 0){
+                    pref.edit().putBoolean(Constants.KEY_SOUND_ENABLED, false).apply();
+                }else{
+                    pref.edit().putBoolean(Constants.KEY_SOUND_ENABLED, true).apply();
+                }
                 pref.edit().putInt(Constants.KEY_SOUND_LEVEL, progress).apply();
             }
 
@@ -63,6 +68,11 @@ public class SettingsFragment extends Fragment {
         musicControl.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if(progress == 0){
+                    pref.edit().putBoolean(Constants.KEY_MUSIC_ENABLED, false).apply();
+                }else{
+                    pref.edit().putBoolean(Constants.KEY_MUSIC_ENABLED, true).apply();
+                }
                 pref.edit().putInt(Constants.KEY_MUSIC_LEVEL, progress).apply();
             }
 

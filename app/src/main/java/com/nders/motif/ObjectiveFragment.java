@@ -43,8 +43,6 @@ public class ObjectiveFragment extends DialogFragment {
 
     @Override
     public int getTheme() {
-        // android.R.style.Theme_Translucent_NoTitleBar
-        // android.R.style.Theme_Translucent_NoTitleBar_Fullscreen;
         return android.R.style.Theme_Translucent_NoTitleBar_Fullscreen;
     }
 
@@ -106,6 +104,9 @@ public class ObjectiveFragment extends DialogFragment {
     @Override
     public void onDismiss(DialogInterface dialog) {
         super.onDismiss(dialog);
+        if(listener != null){
+            listener.onCancel();
+        }
     }
 
     @Override
@@ -120,6 +121,7 @@ public class ObjectiveFragment extends DialogFragment {
     }
 
     public interface OnStartBtnClicked{
+        public void onCancel();
         public void start(int levelId);
     }
 

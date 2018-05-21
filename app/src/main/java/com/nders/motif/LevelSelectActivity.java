@@ -17,6 +17,8 @@ import com.nders.motif.views.GameMapView;
 
 public class LevelSelectActivity extends AppCompatActivity implements GameMapView.GameListener, ObjectiveFragment.OnStartBtnClicked{
 
+    private SoundHelper mSoundHelper;
+
     private ViewGroup mContentView;
     private GameMapView mGameMapView;
 
@@ -27,6 +29,8 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.layout_game_map);
+
+        mSoundHelper = new SoundHelper(this);
 
         mContentView = findViewById(R.id.game_map_layout);
 
@@ -58,6 +62,8 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
     @Override
     public void displayPopup(int levelId, int scrollOffset) {
 
+        mSoundHelper.playButtonClick();
+
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         System.out.println(pref.getInt(Constants.KEY_HIGHEST_LEVEL, 1));
         if(levelId > pref.getInt(Constants.KEY_HIGHEST_LEVEL, 1)){
@@ -79,6 +85,11 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
         startActivity(intent);
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         finish();
+    }
+
+    @Override
+    public void onCancel() {
+        mSoundHelper.playButtonClick();
     }
 
     @Override
