@@ -11,6 +11,8 @@ import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Picture;
+import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -49,13 +51,14 @@ public class GameMapView extends View {
     final Paint mCirclePaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
     final Paint mPathPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
     final TextPaint mTextPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
-
+    final Paint mPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
+    final Paint mPaintShadow = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
     /*
     *   CONSTANTS
     */
     // DRAW params
-    private final int STROKE_WIDTH = 30;
-    private final int RADIUS = 120;
+    private final int STROKE_WIDTH = 20; //30
+    private final int RADIUS = 100; //120
     private final int RING_WIDTH = 20;
     private final int mMapHeight = 7400;
     private int mMapWidth = 1440;
@@ -63,10 +66,11 @@ public class GameMapView extends View {
     // COLORS
     private final int BACKGROUND_COLOR = Color.parseColor("#324056") ;//Color.parseColor("#DF8E57");
     private final int PATH_COLOR = Color.WHITE;//Color.parseColor("#B16248");
+    private final int DASH_PATH_COLOR = Color.parseColor("#223046") ;
     private final int SHADOW_COLOR =  Color.parseColor("#202020") ;//Color.parseColor("#CC703E");
     private final int LOCKED_COLOR = Color.parseColor("#EDD7B0");
     private final int TEXT_COLOR = Color.parseColor("#8A3F3C"); //AC5F47
-    private final int UNLOCKED_COLOR = Color.parseColor("#ffb732") ;//Color.parseColor("#D77D4B");
+    private final int UNLOCKED_COLOR = Color.parseColor("#ffc6f9e5") ;//Color.parseColor("#D77D4B");
 
     private static final String TAG = GameMapView.class.getSimpleName();
 
@@ -97,14 +101,31 @@ public class GameMapView extends View {
 
         mGestureDetector = new GestureDetector(context, new GestureListener());
 
+        mPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mPaint.setStrokeCap(Paint.Cap.ROUND);
+        mPaint.setStrokeJoin(Paint.Join.ROUND);
+        mPaint.setColor(DASH_PATH_COLOR);
+        mPaint.setStrokeWidth(80);
+        mPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+
+        mPaintShadow.setStyle(Paint.Style.FILL_AND_STROKE);
+        mPaintShadow.setStrokeCap(Paint.Cap.ROUND);
+        mPaintShadow.setStrokeJoin(Paint.Join.ROUND);
+        mPaintShadow.setColor(SHADOW_COLOR);
+        mPaintShadow.setStrokeWidth(80);
+        mPaintShadow.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+        mPaintShadow.setAlpha(75);
+
         mPathPaint.setStyle(Paint.Style.STROKE);
         mPathPaint.setStrokeWidth(STROKE_WIDTH);
-        mPathPaint.setColor(PATH_COLOR);
-        mPathPaint.setDither(true);
+        //mPathPaint.setColor(PATH_COLOR);
+        mPathPaint.setColor(Color.parseColor("#FFFFFF"));
+        mPathPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+
 
         mDashPathPaint.setStyle(Paint.Style.STROKE);
         mDashPathPaint.setStrokeWidth(STROKE_WIDTH *.5f);
-        mDashPathPaint.setColor(PATH_COLOR);
+        mDashPathPaint.setColor(DASH_PATH_COLOR);
         mDashPathPaint.setStrokeCap(Paint.Cap.ROUND);
         mDashPathPaint.setStrokeJoin(Paint.Join.ROUND);
         mDashPathPaint.setAlpha(120);
@@ -243,7 +264,7 @@ public class GameMapView extends View {
     private void init(){
 
         // Constants
-        final int RECT_WIDTH = 480; // 540;
+        final int RECT_WIDTH = 400; // 540;
         final int RECT_HEIGHT = 480; //500;
 
         final int MARGIN = (getMeasuredWidth() - RECT_WIDTH *2)/2;
@@ -259,6 +280,8 @@ public class GameMapView extends View {
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////
+        Path blocks = new Path();
+        Path block_shadows = new Path();
         Path path = new Path();
 
         RectF leftRect = new RectF(LEFT, TOP,  (LEFT+RIGHT)/2, BOTTOM);
@@ -286,6 +309,16 @@ public class GameMapView extends View {
             path.lineTo(leftRect.left +  RECT_WIDTH /2 + RECT_WIDTH, leftRect.top);
 
             path.arcTo(rightRect, 270, 180, true);
+
+            blocks.moveTo(getMeasuredWidth(), leftRect.centerY());
+            blocks.lineTo(getMeasuredWidth() - RECT_WIDTH*.75f, leftRect.centerY());
+            blocks.moveTo(0, rightRect.centerY());
+            blocks.lineTo(RECT_WIDTH*.75f, rightRect.centerY());
+
+            block_shadows.moveTo(getMeasuredWidth(), leftRect.centerY() + 20);
+            block_shadows.lineTo(getMeasuredWidth() - RECT_WIDTH*.75f - 20, leftRect.centerY() + 20);
+            block_shadows.moveTo(0, rightRect.centerY() + 20);
+            block_shadows.lineTo(RECT_WIDTH*.75f - 20, rightRect.centerY() + 20);
 
             level++;
             mLocations.add(new Circle(leftRect.left + 50, leftRect.bottom - RECT_HEIGHT /2, RADIUS, level));
@@ -348,43 +381,128 @@ public class GameMapView extends View {
         //====================================================
 
         // draw background
-        mCanvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
+        int c = Color.parseColor("#DB8752");
+        mCanvas.drawColor(c, PorterDuff.Mode.SRC_OVER);
+        mPaint.setColor(Color.parseColor("#D67D4A"));
+
+        for(int i = 1; i < 6; i++){
+            int x = getMeasuredWidth()/5 * i;
+            mCanvas.drawLine(x,0,x,mFullMap.getHeight(), mPaint);
+        }
 
         // draw paths
 
+        //mCanvas.drawPath(dashPath, mDashPathPaint);
         mCanvas.drawPath(path, mPathPaint);
-        mCanvas.drawPath(dashPath, mDashPathPaint);
 
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext());
+        mCanvas.drawPath(block_shadows, mPaintShadow);
+        mPaint.setColor(Color.parseColor("#9E5143"));
+        mCanvas.drawPath(blocks, mPaint);
+
+        SharedPreferences pref = PreferenceManager.
+                getDefaultSharedPreferences(getContext().getApplicationContext());
 
         int highestLevel = pref.getInt(Constants.KEY_HIGHEST_LEVEL, 1);
+
+        Paint mStarPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
+        mStarPaint.setStrokeWidth(3);
+        mStarPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        mStarPaint.setColor(Color.BLACK);
+        mStarPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
         // draw circles
         level = 0;
         for(Circle location : mLocations){
 
+            // draw shadow
             mCanvas.drawCircle(location.centreX() - 25, location.centreY() + 25, RADIUS, mShadowPaint);
+
+            // draw outer circle
             mCanvas.drawCircle(location.centreX(), location.centreY(), RADIUS, mWhitePaint);
+
             if(location.id() <=  highestLevel){
                 mCirclePaint.setColor(UNLOCKED_COLOR);
                 mCanvas.drawCircle(location.centreX(), location.centreY(), RADIUS - RING_WIDTH, mCirclePaint);
-                mCirclePaint.setColor(LOCKED_COLOR);
 
-                BitmapFactory.Options options = new BitmapFactory.Options();
-                options.inScaled = false;
-                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
 
-                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.star, options);
-                float x = location.left();
-                float y = location.top() - bmp.getHeight()*.75f;
-                mCanvas.drawBitmap(bmp, location.left(), y, null);
+                if(location.id() == highestLevel){
+                    ArrayList<ArrayList<PointF>> res = drawFiveStar(location.centreX(), location.centreY() - 100, 18);
+                    ArrayList<PointF> pts = res.get(0);
+                    ArrayList<PointF> pts2 = res.get(1);
+
+                    Path star = new Path();
+                    for(int i = 0, len = pts.size(); i < len; i++){
+                        PointF  p = pts.get(i);
+                        PointF q = pts2.get(i);
+                        PointF r = pts.get((i + 1)%len);
+
+                        star.moveTo(location.centreX(), location.centreY() - 100);
+                        star.lineTo(p.x, p.y);
+                        star.lineTo(q.x, q.y);
+                        star.lineTo(r.x, r.y);
+                    }
+                    star.close();
+                    mCanvas.drawPath(star, mStarPaint);
+                }
+
+
+//                BitmapFactory.Options options = new BitmapFactory.Options();
+//                options.inScaled = false;
+//                options.inPreferredConfig = Bitmap.Config.ARGB_8888;
+//                Bitmap bmp = BitmapFactory.decodeResource(getResources(), R.drawable.star, options);
+//                float x = location.left();
+//                float y = location.top() - bmp.getHeight()*.75f;
+//                mCanvas.drawBitmap(bmp, location.left(), y, null);
 
             }else{
+                mCirclePaint.setColor(LOCKED_COLOR);
                 mCanvas.drawCircle(location.centreX(), location.centreY(), RADIUS - RING_WIDTH, mCirclePaint);
             }
-
+            // draw level number
             mCanvas.drawText(String.valueOf(++level), location.centreX(), location.centreY() + 40, mTextPaint);
         }
+    }
+
+    private ArrayList<ArrayList<PointF>> drawFiveStar(float centerX, float centerY, int width){
+
+        int vertexCount = 5;
+        final float minAngle = 360f/vertexCount;
+        final float midAngle = minAngle/2f;
+        float startX = centerX;
+        float startY = centerY - width;
+
+
+
+        ArrayList<PointF> points = new ArrayList<>();
+        ArrayList<PointF> points2 = new ArrayList<>();
+
+        for(int i = 0; i < vertexCount; i++){
+            float angle = minAngle*i;
+            float rad = (float)(Math.PI *angle)/180f;
+            float rad1;
+
+            float x = (float)(centerX + (startX - centerX)*Math.cos(rad) - (startY - centerY)*Math.sin(rad));
+            float y= (float)(centerY + (startX - centerX)*Math.sin(rad) + (startY - centerY)*Math.cos(rad));
+
+            float a, b;
+            if(i == 0){
+                rad1 = (float)(Math.PI * midAngle)/180f;
+            }else{
+                rad1 = (float)(Math.PI * (midAngle + angle))/180f;
+            }
+
+            a = (float)(centerX + (startX - centerX)*Math.cos(rad1) - (startY + width/2 - centerY)*Math.sin(rad1));
+            b= (float)(centerY + (startX - centerX)*Math.sin(rad1) + (startY + width/2 - centerY)*Math.cos(rad1));
+
+
+            points2.add(new PointF(a, b));
+            points.add(new PointF(x, y));
+        }
+
+        ArrayList<ArrayList<PointF>> res = new ArrayList<>();
+        res.add(points);
+        res.add(points2);
+        return res;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
