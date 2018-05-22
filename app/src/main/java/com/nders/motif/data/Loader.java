@@ -29,7 +29,6 @@ public class Loader{
     private Context mContext;
 
     private int mCount;
-    private int mBufferCount;
     private int mGraphNumber;
 
     private LoaderListener mLoaderListener =  null;
@@ -38,7 +37,6 @@ public class Loader{
         mGraphNumber = 1; // default value
         mContext = context;
         mCount = count;
-        mBufferCount = Constants.MAX_NODE_COUNT - count;
 
         // OPEN DATABASE
         try {
@@ -146,27 +144,24 @@ public class Loader{
         @Override
         protected void onPostExecute(ArrayList<DotNode> values) {
             super.onPostExecute(values);
-            if(mLoaderListener != null) mLoaderListener.onLoadBuffer(values);
+            if(mLoaderListener != null) mLoaderListener.onLoadBuffer(new ArrayList<DotNode>(values));
         }
 
         @Override
         protected void onProgressUpdate(ArrayList<DotNode>... values) {
             super.onProgressUpdate(values);
-            if(mLoaderListener != null) mLoaderListener.onLoad(values[0]);
+            if(mLoaderListener != null) mLoaderListener.onLoad(new ArrayList<DotNode>(values[0]));
         }
 
         @Override
         protected ArrayList<DotNode> doInBackground(Void... voids) {
-            ArrayList<DotNode> dotNodes = new ArrayList<>();
-            ArrayList<DotNode> bufferNodes = new ArrayList<>();
+            ArrayList<DotNode> startingNodes = new ArrayList<>();
+            ArrayList<DotNode> allNodes = new ArrayList<>();
 
 
             if(mNodeCursor == null){
                 String nodeTableName = String.format("motifdata%02d_nodes", mGraphNumber);
-                String query = "SELECT * FROM " + nodeTableName + " WHERE mId IN (SELECT mId FROM "
-                        + nodeTableName + " ORDER BY RANDOM() )"; //LIMIT " + mCount + "
                 Log.i(TAG, "NODE LOADER CALLED");
-                //mNodeCursor = mSQLiteDB.rawQuery(query, null);
                 mNodeCursor = mMotifDatabaseHelper.query(nodeTableName, null, null,
                         null, "RANDOM()", null, null);
             }
@@ -175,43 +170,31 @@ public class Loader{
                 DotNode node;
 
                 //============================================
-                // LOAD "mCount" nodes
+                // LOAD NODES
                 //============================================
                 int i = 0;
                 do {
-
                     node = new DotNode(
                             mNodeCursor.getInt(MotifDatabaseHelper.KEY_ID),
                             mNodeCursor.getString(MotifDatabaseHelper.KEY_LABEL),
                             mNodeCursor.getInt(MotifDatabaseHelper.KEY_DEGREE));
 
                     if(mLoaderListener != null && mLoaderListener.isNodeValid(node.degree)){
-                        dotNodes.add(node);
+                        startingNodes.add(node);
                         i++;
                     }
 
-                    if(i >= mCount) break;
+                    allNodes.add(node);
+
+                    if(i == mCount){
+                        // Publish "mCount" nodes for initializing game surface
+                        publishProgress(startingNodes);
+                    }
 
                 } while (mNodeCursor.moveToNext());
 
-                publishProgress(dotNodes);
-
-                //============================================
-                // LOAD REMAINING "mBufferCount" nodes
-                //============================================
-                int j = 0;
-                do{
-                    if(++j > mBufferCount ) break;
-
-                    node = new DotNode(
-                            mNodeCursor.getInt(MotifDatabaseHelper.KEY_ID),
-                            mNodeCursor.getString(MotifDatabaseHelper.KEY_LABEL),
-                            mNodeCursor.getInt(MotifDatabaseHelper.KEY_DEGREE));
-
-                    bufferNodes.add(node);
-                }while (mNodeCursor.moveToNext());
             }
-            return bufferNodes;
+            return allNodes;
         }
     }
 
@@ -236,6 +219,4 @@ public class Loader{
     public void setLoadListener(LoaderListener listener){
         this.mLoaderListener = listener;
     }
-
-
 }

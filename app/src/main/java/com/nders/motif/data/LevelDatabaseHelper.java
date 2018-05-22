@@ -8,7 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.util.Log;
 
 import com.nders.motif.entities.DotColor;
-import com.nders.motif.levels.Level;
+import com.nders.motif.game.Level;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -125,8 +125,8 @@ public class LevelDatabaseHelper extends SQLiteOpenHelper {
 
             values.put(COLUMN_ID, level.id());
             values.put(COLUMN_UNLOCKED, (level.isUnlocked() ? 1: 0) );
-            values.put(COLUMN_HIGHSCORE, level.highScore());
-            values.put(COLUMN_MOVES, level.movesLeft());
+            values.put(COLUMN_HIGHSCORE, level.highScore);
+            values.put(COLUMN_MOVES, level.moves());
             values.put(COLUMN_RED, (int)map.get(DotColor.RED));
             values.put(COLUMN_ORANGE, (int)map.get(DotColor.ORANGE));
             values.put(COLUMN_YELLOW, (int)map.get(DotColor.YELLOW));

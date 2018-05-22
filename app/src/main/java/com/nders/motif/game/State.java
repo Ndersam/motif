@@ -12,15 +12,29 @@ public class State {
     private int mScore;
     private int mMovesLeft;
 
-    private static final int RED_DOT_THRESHOLD = 8;
-    private static final int INVALID_DOT_THRESHOLD = 3;
-    private static final int TOTAL_INVALID_DOT_THRESHOLD = 10;
+    private static int RED_DOT_LIMIT = 8;
+    private static final int BAD_DOT_LIMIT = 10;
+    private static final int GOOD_NON_ROY_LIMIT = 16;
 
+    // 'Weird' names
+
+    // A dot is good if it is one of the dots that are to be collected.
+    // That is, if the dot color exist in the level objective map.
+    private int mGoodDotCount;
+
+    // This is a dot that is 'good' and not one of { RED, ORANGE, YELLOW } dots
+    private int mGoodNonROYDots;
+
+    // A RED dot is one with dotColor == DotColor.RED
     private int mRedDotCount = 0;
-    private int mValidDotCount = 0;
-    private int mInvalidDotCount = 0;
 
-    private EnumMap<DotColor, Integer> mDotColorCounter = new EnumMap<>(DotColor.class);
+    // A dot is 'bad' if it is not of the dots that are to be collected.
+    private int mBadDotCount = 0;
+
+
+    // Maps the dotColors to be collected to a tuple of two numbers - the first (the number of dots
+    // ... with a certain dotColor to be collected) and the second (the number of dots with
+    // ... a such dotColor that have been collected)
     private EnumMap<DotColor, int[]> mProgressCounter = new EnumMap<>(DotColor.class);
     public static final int IDX_DOTS_GOAL = 0;
     public static final int IDX_DOTS_COLLECTED = 1;
@@ -29,38 +43,49 @@ public class State {
         mLevel = level;
         for(DotColor key: mLevel.getObjective().keySet()){
             mProgressCounter.put(key, new int[]{mLevel.getObjective().get(key), 0});
+            if(isROYDot(key)){
+                mGoodDotCount++;
+            }else{
+                mGoodNonROYDots++;
+            }
         }
         mMovesLeft = mLevel.moves();
         mScore = 0;
+
+        if(mGoodNonROYDots >= mGoodDotCount*.75f){
+            RED_DOT_LIMIT = 19;
+        }
     }
 
-    public EnumMap<DotColor, int[]> progress() {
-        return mProgressCounter;
-    }
 
     /**
      * Updates game score, the count of "dotColor" and updates the dotColorCounter
      */
     public void update(DotColor selectedColor, Stack<Rectangle> selected, boolean rectFormed){
-        int valid = 0;
-        int invalid = 0;
+
+        mMovesLeft--;
+
+        // If dots with the color, "selectedColor" have all been collected prior to this ...
+        // ... call, only increase score by two
+        if(isCollected(selectedColor)) {
+            mScore += 2;
+        }else{
+            mScore += selected.size() *(rectFormed? 2: 1);
+        }
 
         for(Rectangle dot: selected){
             if(mProgressCounter.containsKey(dot.dotColor())){
-                int dotCount = mDotColorCounter.get(dot.dotColor());
-                mDotColorCounter.put(dot.dotColor(), --dotCount);
-                valid++;
+                if(!isROYDot(dot.dotColor())){
+                    mGoodNonROYDots--;
+                }
             }else {
-                invalid++;
+                if(dot.dotColor() == DotColor.RED){
+                    mRedDotCount--;
+                }else{
+                    mBadDotCount--;
+                }
             }
         }
-
-        if(invalid > 0){
-            mScore += 2;
-        }
-
-        mMovesLeft--;
-        mScore += valid *(rectFormed? 2: 1);
 
         // Update Dots Collected
         if(mProgressCounter.containsKey(selectedColor)){
@@ -68,52 +93,65 @@ public class State {
             values[IDX_DOTS_COLLECTED] += selected.size();
             mProgressCounter.put(selectedColor,values);
         }
-
     }
 
+    /**
+     * Returns true if one of the following conditions are met
+     *  1. Node's color is contained in the objective and if color is NON-ROY (Red, Orange or Yellow)
+     *      ... and the NON_ROY_DOT_LIMIT  has not been reached.
+     *  2. Node's color is not contained in the objective and is RED and the ...
+     *      ... RED_DOT_LIMIT has not been reached.
+     *  3. Node's color is not contained in the objective and is not RED and the ...
+     *      ... BAD_DOT_LIMIT has not been reached.
+     *
+     * @param degree The degree of a DotNode.
+     */
     public boolean isNodeValid(int degree) {
         DotColor key = DotColor.valueOf(degree);
-        boolean badDot = true;
-        boolean redDot = false;
+
         boolean isValid = true;
-        int currentCount = 0;
 
-        if(key == DotColor.RED){
-            redDot = true;
-        }
-
+        // Inspect for validity
         if(mProgressCounter.containsKey(key)){
-            badDot = false;
+            if(!isROYDot(key)){
+                if(mGoodNonROYDots < GOOD_NON_ROY_LIMIT){
+                    mGoodNonROYDots++;
+                }else {
+                    isValid = false;
+                }
+            }
         }
-
-        if(mDotColorCounter.containsKey(key)){
-            currentCount = mDotColorCounter.get(key);
-        }
-
-        if(!badDot){
-            mInvalidDotCount++;
-        }else if(redDot && mRedDotCount < RED_DOT_THRESHOLD){
+        else if(key == DotColor.RED && mRedDotCount < RED_DOT_LIMIT){
             mRedDotCount++;
-        }else if(mInvalidDotCount  < TOTAL_INVALID_DOT_THRESHOLD){
-            mInvalidDotCount++;
+        }else if(mBadDotCount < BAD_DOT_LIMIT){
+            mBadDotCount++;
         }else{
             isValid = false;
         }
-
-        if(isValid ){
-            mDotColorCounter.put(key, ++currentCount);
-            return true;
-        }
-
-        return false;
+        return isValid;
     }
 
+    /**
+     * Returns true if game objectives have been satisfied
+     */
     public boolean succeeded(){
         return  allDotsCollected() && (mMovesLeft >= 0);
     }
 
+    /**
+     * Returns true if game objective has not been satisfied and
+     * no moves are left
+     */
     public boolean failed(){
         return !allDotsCollected() && (mMovesLeft < 0);
+    }
+
+    /**
+     * isROYDot --> is Red or Orange or Yellow dot
+     * Returns true if dotColor is one of {DotColor.RED, DotColor.ORANGE, DotColor.YELLOW}
+     */
+    private boolean isROYDot(DotColor dotColor){
+       return dotColor == DotColor.RED || dotColor == DotColor.ORANGE || dotColor == DotColor.YELLOW;
     }
 
 
@@ -136,7 +174,7 @@ public class State {
      * Returns true if level has been completed
      * @return boolean stating whether the level has been completed
      */
-    public boolean allDotsCollected(){
+    private boolean allDotsCollected(){
         for(DotColor key: mProgressCounter.keySet()){
             int[] values = mProgressCounter.get(key);
             if(values[IDX_DOTS_COLLECTED] < values[IDX_DOTS_GOAL]){
@@ -159,6 +197,9 @@ public class State {
     //                                                      //
     //////////////////////////////////////////////////////////
 
+    public EnumMap<DotColor, int[]> progress() {
+        return mProgressCounter;
+    }
 
     public int score(){
         return  mScore;
@@ -177,4 +218,3 @@ public class State {
         return mMovesLeft;
     }
 }
-
