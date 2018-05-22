@@ -20,6 +20,9 @@ public class HomeActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_home);
 
+        mSoundHelper = new SoundHelper(this);
+        mSoundHelper.prepareMusicPlayer(getApplicationContext());
+
         Button btnPlay = findViewById(R.id.btn_play);
         Button btnOptions = findViewById(R.id.btn_options);
         Button btnAbout = findViewById(R.id.btn_about);
@@ -53,23 +56,18 @@ public class HomeActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
             }
         });
-
-
-        mSoundHelper = new SoundHelper(this);
-        mSoundHelper.prepareMusicPlayer(getApplicationContext());
-
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        mSoundHelper.playMusic();
+        //mSoundHelper.playMusic();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        mSoundHelper.stopMusic();
+        //mSoundHelper.stopMusic();
     }
 
 }

@@ -14,7 +14,7 @@ import android.view.View;
 
 import com.nders.motif.data.LevelDatabaseHelper;
 import com.nders.motif.entities.DotColor;
-import com.nders.motif.levels.Level;
+import com.nders.motif.game.Level;
 
 import java.util.Map;
 

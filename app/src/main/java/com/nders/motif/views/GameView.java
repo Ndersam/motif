@@ -30,7 +30,6 @@ import com.nders.motif.game.Level;
 import com.nders.motif.game.State;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
@@ -186,12 +185,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // List of remaining nodes loaded from the database.
     // The content of this container are gradually removed and used to replace ...
     // .. selected dots in "mGraphNodes".
-    protected List<DotNode> mBufferNodes = new ArrayList<>();
+    protected List<DotNode> mNodes = new ArrayList<>();
 
-    // List of deleted nodes.
-    // Nodes are deleted when their corresponding dots have been selected and ...
-    // ... removed.
-    protected List<DotNode> mDeletedNodes = new ArrayList<>();
+    // The size of buffer
+    protected int mBufferSize = 0;
 
     // Object delegated with the responsibility of querying and loading data ...
     // ... from the database.
@@ -260,7 +257,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     protected boolean mIsRectFormed = false;
 
-
     /**
      **   MISC
      */
@@ -305,9 +301,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 .getDefaultDisplay().getRefreshRate());
 
 
-
         // Paints
-
         mBackgroundPaint = new Paint();
         mBackgroundPaint.setAntiAlias(true);
         mBackgroundPaint.setStyle(Paint.Style.FILL_AND_STROKE);
@@ -599,7 +593,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
                                     // To close a rectangular path 4 lines are needed.
                                     // If mLines has at least 3 lines, close path
-                                    if(mLines.size() >= 3 && (line.length() <= (VERTICAL_SPACING + 2 * RADIUS))){
+                                    if(mLines.size() >= 3 && (line.length() <= (VERTICAL_SPACING + 2 * RADIUS)) && line.length() >=(VERTICAL_SPACING) ){
                                         Log.i(TAG, "Line Valid");
 
                                         List<Line> lines = new ArrayList<>();
@@ -700,7 +694,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                     canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
                 }
                 else{
-                    mDeletedNodes.add(rect.toDotNode());
                     dotsPerColumn.put(rect.column(), 1 + dotsPerColumn.get(rect.column(), 0));
                 }
             }
@@ -717,7 +710,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         printRects();
         Log.i(TAG,"SELECTED DOTS: { " + mStartRect.dotColor().toString() + ", " + mSelectedDots.size() + " }");
         try {
-            Thread.sleep(TIME_DELAY);
+            Thread.sleep(TIME_DELAY*8);
         }catch (InterruptedException e){
             e.printStackTrace();
         }
@@ -813,11 +806,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
                         // add new dot
                         Rectangle rect = mRectangles.get(MAX_ROW_COUNT - 1).get(column);
-                        //mDeletedNodes.add(rect.toDotNode());
                         DotNode node = getNewNode();
                         rect.deselect();
                         rect.setId(node.id);
                         rect.setDotColor(DotColor.valueOf(node.degree));
+
                         done = false;
                     }
                 }
@@ -882,7 +875,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                         }
                     } else {
                         canvas.drawCircle( rect.getX(),  rect.getY(), RADIUS, mColorPaint);
-                        //canvas.drawCircle( rect.centreX(),  rect.centreY(), RADIUS - 20, mBlackPaint);
+                        // canvas.drawCircle( rect.getX(),  rect.getY(), RADIUS - 20, mBlackPaint);
                     }
                 }
             }
@@ -920,7 +913,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     private synchronized void onActionReset(){
 
-        Log.i(TAG, "Buffered: " + mBufferNodes.size() + "; Recycled: " + mDeletedNodes.size());
+        Log.i(TAG, "Buffered: " + mBufferSize + "; Recycled: " + (mNodes.size() - mBufferSize));
 
         //========================
         // REDRAW UI
@@ -962,9 +955,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         mState = STATE.DO_NOTHING;
 
         if(mGameOverListener != null){
-//            if(mGameLevel.succeeded() || mGameLevel.failed()){
-//                mGameOverListener.gameOver(mGameLevel);
-//            }
             if(mGameState.succeeded() || mGameState.failed()){
                 mGameOverListener.gameOver(mGameState);
             }
@@ -1086,25 +1076,21 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         DotNode node = null;
 
         while(true){
-            if(mBufferNodes.size() > 0){
-                node = mBufferNodes.get(mBufferNodes.size() - 1);
-                mBufferNodes.remove(mBufferNodes.size() - 1);
+
+            if(mBufferSize > 0){
+                node = mNodes.get(mBufferSize - 1);
+                mBufferSize--;
             }else{
                 // If all nodes in the buffer container have been exhausted, ...
                 // ... recycle the old deleted nodes.
+                // NOTE: Nodes are deleted logically
                 Log.i(TAG, "Recycled");
-                Log.i(TAG, "Before: " + mBufferNodes.size() + ", " + mDeletedNodes.size());
-               // Collections.shuffle(mDeletedNodes);
-                mBufferNodes.addAll(mDeletedNodes);
-                mDeletedNodes.clear();
-                Log.i(TAG, "After " + mBufferNodes.size() + ", " + mDeletedNodes.size());
+                mBufferSize = mNodes.size();
             }
 
             if(node != null && mGameState.isNodeValid(node.degree)){
                 break;
             }
-
-            mDeletedNodes.add(node);
         }
         return node;
     }
@@ -1490,8 +1476,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     @Override
     public void onLoadBuffer(ArrayList<DotNode> nodes) {
-        mBufferNodes = nodes;
-        Log.i(TAG, "BUFFER SIZE " + mBufferNodes.size());
+        mNodes = nodes;
+        mBufferSize = mNodes.size();
+        Log.i(TAG, "BUFFER SIZE " + mNodes.size());
     }
 
 }

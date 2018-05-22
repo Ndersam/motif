@@ -14,7 +14,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.nders.motif.data.LevelDatabaseHelper;
-import com.nders.motif.levels.Level;
+import com.nders.motif.game.Level;
+import com.nders.motif.game.State;
 import com.nders.motif.views.GameView;
 
 
@@ -119,24 +120,23 @@ public class GameFragment extends Fragment implements GameView.GameOverListener{
     public int getGameID(){return  mGameID;}
 
     @Override
-    public void gameOver(Level level) {
-
-        boolean success = level.succeeded();
+    public void gameOver(State state) {
+        boolean success = state.succeeded();
         Bundle bundle = new Bundle();
 
         if(success){
 
             // Update HighScore
-            if(level.isNewHighScore()){
-                LevelDatabaseHelper.getInstance(getContext()).updateLevel(level);
+            if(state.isNewHighScore()){
+                LevelDatabaseHelper.getInstance(getContext()).updateLevel(state.level());
             }
 
             // Unlock new level (if any)
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext().getApplicationContext());
             System.out.println(pref.getInt(Constants.KEY_HIGHEST_LEVEL, 1));
-            if(level.id() == pref.getInt(Constants.KEY_HIGHEST_LEVEL, 1) && level.id() < Constants.MAX_LEVEL){
+            if(state.levelId() == pref.getInt(Constants.KEY_HIGHEST_LEVEL, 1) && state.levelId() < Constants.MAX_LEVEL){
                 System.out.println("I got here");
-                pref.edit().putInt(Constants.KEY_HIGHEST_LEVEL, level.id() + 1).apply();
+                pref.edit().putInt(Constants.KEY_HIGHEST_LEVEL, state.levelId() + 1).apply();
 
             }
             System.out.println(pref.getInt(Constants.KEY_HIGHEST_LEVEL, 1));
@@ -146,8 +146,8 @@ public class GameFragment extends Fragment implements GameView.GameOverListener{
         FragmentManager manager = getActivity().getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
 
-        bundle.putInt(Constants.KEY_GAME_SCORE, level.score());
-        bundle.putInt(Constants.KEY_GAME_ID, level.id());
+        bundle.putInt(Constants.KEY_GAME_SCORE, state.score());
+        bundle.putInt(Constants.KEY_GAME_ID, state.levelId());
         bundle.putBoolean(Constants.KEY_GAME_COMPLETE, success);
 
         GameOverMenu levelCompleteMenu = new GameOverMenu();
@@ -155,7 +155,6 @@ public class GameFragment extends Fragment implements GameView.GameOverListener{
 
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.replace(R.id.game_content_frame, levelCompleteMenu).commit();
-
     }
 
     public void restart(){

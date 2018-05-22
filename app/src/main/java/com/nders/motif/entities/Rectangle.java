@@ -88,7 +88,7 @@ public class Rectangle {
         mID = id;
     }
 
-    public void setDimensions(float top, float bottom) {
+    private void setDimensions(float top, float bottom) {
         mTop = top;
         mBottom = bottom;
         mCenterY = (mTop + mBottom) / 2;
@@ -139,17 +139,17 @@ public class Rectangle {
         return comp;
     }
 
-    public boolean step() {
-        boolean validStep = true;
-
-        mAnimY += 100;
-        if (mAnimY >= mCenterY) {
-            mAnimY = mAnimStartY;
-            validStep = false;
-        }
-
-        return validStep;
-    }
+//    public boolean step() {
+//        boolean validStep = true;
+//
+//        mAnimY += 100;
+//        if (mAnimY >= mCenterY) {
+//            mAnimY = mAnimStartY;
+//            validStep = false;
+//        }
+//
+//        return validStep;
+//    }
 
     public float getAnimY() {
         return mAnimY;
@@ -170,7 +170,7 @@ public class Rectangle {
 
 
     /**
-     * Swap all the content between this Rect and another except for location
+     * Swap all the content of this Rectangle and another except for location
      * variables.
      * @param other another Rectangle object
      */
@@ -190,6 +190,27 @@ public class Rectangle {
         // Sanity setting
         other.mSelected = true;
         mSelected = false;
+    }
+
+
+    /**
+     * Swap the contents of two Rectangle objects except for location
+     * variables.
+     * @param a a Rectangle object
+     * @param b another Rectangle object
+     */
+    public static void swap(Rectangle a, Rectangle b){
+        int id = a.mID;
+        DotColor color = a.mDotColor;
+        boolean selected = a.mSelected;
+
+        a.mID = b.mID;
+        a.mDotColor = b.mDotColor;
+        a.mSelected = b.mSelected;
+
+        b.mID = id;
+        b.mDotColor = color;
+        b.mSelected = selected;
     }
 
     public DotNode toDotNode(){

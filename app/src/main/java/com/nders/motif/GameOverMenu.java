@@ -3,6 +3,7 @@ package com.nders.motif;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
@@ -20,6 +21,7 @@ import android.widget.TextView;
 
 public class GameOverMenu extends DialogFragment {
 
+
     private static final String TAG = GameOverMenu.class.getSimpleName();
 
     private int mLevelId = 0;
@@ -32,7 +34,7 @@ public class GameOverMenu extends DialogFragment {
         Bundle bundle = this.getArguments();
         if (bundle != null) {
             mLevelId = bundle.getInt(Constants.KEY_GAME_ID, 0);
-            mLevelScore = bundle.getInt(Constants.KEY_GAME_SCORE, 0);
+            mLevelScore = bundle.getInt(Constants.KEY_GAME_SCORE, 1);
             mLevelComplete = bundle.getBoolean(Constants.KEY_GAME_COMPLETE, true);
         }
     }
@@ -50,8 +52,17 @@ public class GameOverMenu extends DialogFragment {
         return dialog;
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
 
-    public View init(LayoutInflater inflater){
+        if(mLevelComplete){
+            animateCountUp();
+        }
+
+    }
+
+    private View init(LayoutInflater inflater){
         View contentView;
         if(mLevelComplete){
             contentView= inflater.inflate(R.layout.fragment_levelcomplete, null);
@@ -66,9 +77,10 @@ public class GameOverMenu extends DialogFragment {
                     getActivity().finish();
                 }
             });
+            btnContinue.setEnabled(false);
 
             TextView txtScore = contentView.findViewById(R.id.gameover_score);
-            txtScore.setText(String.valueOf(mLevelScore));
+            //txtScore.setText(String.valueOf(mLevelScore));
 
             TextView txtTitle = contentView.findViewById(R.id.gameover_title);
             txtTitle.setText("Level " + mLevelId);
@@ -112,5 +124,45 @@ public class GameOverMenu extends DialogFragment {
         return contentView;
     }
 
+    private void animateCountUp(){
+        final TextView txtScore = getView().findViewById(R.id.gameover_score);
+        final Button btnContinue = getView().findViewById(R.id.levelcomplete_continue);
+
+        final long delay = 1800 / (mLevelScore);
+
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                // Count up
+                int count = 1;
+                while(count <= mLevelScore){
+                    final int i = count;
+                    txtScore.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            txtScore.setText(String.valueOf(i));
+                        }
+                    });
+
+                    count++;
+
+                    try{
+                        Thread.sleep(delay);
+                    }catch (InterruptedException e){
+                        e.printStackTrace();
+                    }
+                }
+
+                // Enable Continue Button
+                btnContinue.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        btnContinue.setEnabled(true);
+                    }
+                });
+            }
+        }).start();
+    }
 
 }

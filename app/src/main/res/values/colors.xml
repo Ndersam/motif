@@ -74,7 +74,7 @@
 
     <color name="black_overlay">#66000000</color>
     <color name="dark_background">#202020</color>
-    <color name="levelcomplete">#5A8DBA</color>
+    <color name="levelcomplete">#ffb6e9b5</color>
     <color name="levelfailed">#FFC107</color>
 
     <color name="ltgray">#ffcccccc</color>

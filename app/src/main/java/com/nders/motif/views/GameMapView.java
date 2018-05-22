@@ -4,21 +4,17 @@ package com.nders.motif.views;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
 import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.Picture;
-import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Typeface;
-import android.graphics.drawable.Drawable;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.text.TextPaint;
@@ -29,9 +25,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import com.nders.motif.Constants;
-import com.nders.motif.R;
 import com.nders.motif.entities.Circle;
-import com.nders.motif.levels.Level;
 
 
 import java.util.ArrayList;
