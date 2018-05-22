@@ -26,7 +26,8 @@ import com.nders.motif.entities.DotNode;
 import com.nders.motif.entities.Line;
 import com.nders.motif.entities.Rectangle;
 import com.nders.motif.data.Loader;
-import com.nders.motif.levels.Level;
+import com.nders.motif.game.Level;
+import com.nders.motif.game.State;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,7 +74,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     protected static final float HEADER_DOTS_SPACING = 90;
 
     // The height setting of the header and the footer.
-    protected static final int HEADER_FOOTER_HEIGHT = 300;
+    protected static final int HEADER_FOOTER_HEIGHT = 250;
 
     // Padding used in "padding" the contents of the header and the footer.
     protected static final float VERTICAL_PADDING = 16;
@@ -99,7 +100,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     protected int HEADER_FOOTER_COLOR = Color.parseColor("#FFF6D5");
     protected int SCORE_COLOR =  HEADER_FOOTER_COLOR;
     protected int TEXT_COLOR = Color.parseColor("#202020");
-    protected int TEXT_MOVES_COLOR = Color.LTGRAY; //Color.parseColor("#FFC107");
+    protected int TEXT_MOVES_COLOR = Color.parseColor("#717171");//Color.LTGRAY; //Color.parseColor("#FFC107");
     // Paints
     protected Paint mTextPaint;
     protected Paint mBlackPathPaint;
@@ -254,8 +255,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     protected boolean mIsDrawing = false;
 
-    // The current game int_score.
-    protected int mGameScore = 0;
+    // The current game state
+    protected State mGameState = null;
+
+    protected boolean mIsRectFormed = false;
 
 
     /**
@@ -634,6 +637,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                                     l.startId, l.endId) + " " + l.type());
                                         }
                                         if(lines.size() >= 3 && mIsDrawing){
+                                            mIsRectFormed = true;
                                             mLines.push(line);
                                             mIsDrawing = false;
                                         }else{
@@ -671,7 +675,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
 
         // Update score info
-        mGameLevel.updateScore(mSelectedDotColor, mSelectedDots.size());
+        mGameState.update(mSelectedDotColor, mSelectedDots, mIsRectFormed);
 
         Canvas canvas = mSurfaceHolder.lockCanvas(null);
 
@@ -696,6 +700,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                     canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
                 }
                 else{
+                    mDeletedNodes.add(rect.toDotNode());
                     dotsPerColumn.put(rect.column(), 1 + dotsPerColumn.get(rect.column(), 0));
                 }
             }
@@ -808,6 +813,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
                         // add new dot
                         Rectangle rect = mRectangles.get(MAX_ROW_COUNT - 1).get(column);
+                        //mDeletedNodes.add(rect.toDotNode());
                         DotNode node = getNewNode();
                         rect.deselect();
                         rect.setId(node.id);
@@ -914,6 +920,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     private synchronized void onActionReset(){
 
+        Log.i(TAG, "Buffered: " + mBufferNodes.size() + "; Recycled: " + mDeletedNodes.size());
+
         //========================
         // REDRAW UI
         //========================
@@ -948,13 +956,17 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         printRects();
 
         mLines.clear();
+        mIsRectFormed = false;
         mSelectedDots.clear();
         mStartRect =  null;
         mState = STATE.DO_NOTHING;
 
         if(mGameOverListener != null){
-            if(mGameLevel.succeeded() || mGameLevel.failed()){
-                mGameOverListener.gameOver(mGameLevel);
+//            if(mGameLevel.succeeded() || mGameLevel.failed()){
+//                mGameOverListener.gameOver(mGameLevel);
+//            }
+            if(mGameState.succeeded() || mGameState.failed()){
+                mGameOverListener.gameOver(mGameState);
             }
         }
 
@@ -1073,40 +1085,26 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     private DotNode getNewNode(){
         DotNode node = null;
 
-
-        while (!mBufferNodes.isEmpty()){
-            node = mBufferNodes.get(mBufferNodes.size() - 1);
-            mBufferNodes.remove(mBufferNodes.size() - 1);
-
-            if(isDataValid(node.degree)){
-                break;
-            }
-            mDeletedNodes.add(node);
-        }
-
-        if (mBufferNodes.isEmpty()){
-            // If all nodes in the buffer container have been exhausted, ...
-            // ... recycle the old deleted nodes.
-            Log.i(TAG, "Recycled");
-            Log.i(TAG, "Before: " + mBufferNodes.size() + ", " + mDeletedNodes.size());
-
-            Collections.shuffle(mDeletedNodes);
-            mBufferNodes = new ArrayList<>(mDeletedNodes);
-            mDeletedNodes.clear();
-
-            Log.i(TAG, "After " + mBufferNodes.size() + ", " + mDeletedNodes.size());
-            while (!mBufferNodes.isEmpty()){
+        while(true){
+            if(mBufferNodes.size() > 0){
                 node = mBufferNodes.get(mBufferNodes.size() - 1);
                 mBufferNodes.remove(mBufferNodes.size() - 1);
-                if(isDataValid(node.degree)){
-                    break;
-                }
-                mDeletedNodes.add(node);
+            }else{
+                // If all nodes in the buffer container have been exhausted, ...
+                // ... recycle the old deleted nodes.
+                Log.i(TAG, "Recycled");
+                Log.i(TAG, "Before: " + mBufferNodes.size() + ", " + mDeletedNodes.size());
+               // Collections.shuffle(mDeletedNodes);
+                mBufferNodes.addAll(mDeletedNodes);
+                mDeletedNodes.clear();
+                Log.i(TAG, "After " + mBufferNodes.size() + ", " + mDeletedNodes.size());
             }
-        }
 
-        if(node == null){
-            Log.i(TAG, "I am null");
+            if(node != null && mGameState.isNodeValid(node.degree)){
+                break;
+            }
+
+            mDeletedNodes.add(node);
         }
         return node;
     }
@@ -1124,16 +1122,17 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
         int numOfDots = 1;
         EnumMap<DotColor, Integer> objective = null;
-        EnumMap<DotColor, Integer> score = null;
+        EnumMap<DotColor, int[]> score = null;
         if(mGameLevel != null){
             objective = mGameLevel.getObjective();
-            score = mGameLevel.getScore();
+            //score = mGameLevel.getScore();
+            score = mGameState.progress();
             numOfDots = objective.size();
         }
 
         float startX = getMeasuredWidth() -
                 (numOfDots* RADIUS_SMALL *2 + HEADER_DOTS_SPACING *(numOfDots -1));
-        float startY = (RADIUS_SMALL + VERTICAL_PADDING + HEADER_DOTS_SPACING);
+        float startY = (HEADER_FOOTER_HEIGHT - (RADIUS_SMALL*2 + 100 - 20 ));
 
         startX /= 2;
         startX += RADIUS_SMALL;
@@ -1141,20 +1140,21 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         mTextPaint.setTextSize(TEXT_SIZE_MEDIUM);
         mTextPaint.setColor(TEXT_COLOR);
 
+        // draw objective dots
         if(objective != null){
             for(DotColor dotColor: objective.keySet()){
                 mColorPaint.setColor(dotColor.colorInfo());
                 canvas.drawCircle(startX, startY, RADIUS_SMALL, mColorPaint);
 
-                if(score.get(dotColor) < objective.get(dotColor)){
-                    String string = score.get(dotColor) + " / " + objective.get(dotColor);
+                if(!mGameState.isCollected(dotColor)){
+                    String string = score.get(dotColor)[State.IDX_DOTS_COLLECTED] + " / " + score.get(dotColor)[State.IDX_DOTS_GOAL] ;
                     canvas.drawText(string, startX, startY + 100, mTextPaint);
                 }else{
                     // draw tick mark
                     float posY = startY + RADIUS_SMALL*0.4f;
                     float x = RADIUS_SMALL*(float)Math.cos(Math.PI/3);
                     float y = RADIUS_SMALL*(float)Math.sin(Math.PI/3);
-                    canvas.drawLine(startX, posY, startX + x, posY  - y, mWhitePathPaint);
+                    canvas.drawLine(startX, posY, startX + x - 5, posY  - y, mWhitePathPaint);
                     x = .5f*RADIUS_SMALL*(float)Math.cos(Math.PI/6);
                     y = .5f*RADIUS_SMALL*(float)Math.sin(Math.PI/6);
                     canvas.drawLine(startX, posY, startX - x, posY  - y, mWhitePathPaint);
@@ -1172,8 +1172,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         // draw Score
         mTextPaint.setColor(TEXT_MOVES_COLOR);
         mTextPaint.setTextSize(TEXT_SIZE_LARGE);
-        canvas.drawText(String.valueOf(mGameLevel.score()), scoreRect.centerX(), scoreRect.centerY() + TEXT_SIZE_LARGE/3, mTextPaint);
-        mTextPaint.setColor(TEXT_MOVES_COLOR);
+        canvas.drawText(String.valueOf(mGameState.score()), scoreRect.centerX(), scoreRect.centerY() + TEXT_SIZE_LARGE/3, mTextPaint);
+        mTextPaint.setColor(Color.LTGRAY);
         mTextPaint.setTextSize(TEXT_SIZE_SMALL);
         canvas.drawText("SCORE", scoreRect.centerX(), scoreRect.centerY()+ TEXT_SIZE_LARGE/3 + 60, mTextPaint);
 
@@ -1181,8 +1181,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         // draw Moves
         mTextPaint.setColor(TEXT_MOVES_COLOR);
         mTextPaint.setTextSize(TEXT_SIZE_LARGE);
-        canvas.drawText(String.valueOf(mGameLevel.movesLeft()), movesRect.centerX(), movesRect.centerY() + TEXT_SIZE_LARGE/3, mTextPaint);
-        mTextPaint.setColor(TEXT_MOVES_COLOR);
+        canvas.drawText(String.valueOf(mGameState.movesLeft()), movesRect.centerX(), movesRect.centerY() + TEXT_SIZE_LARGE/3, mTextPaint);
+        mTextPaint.setColor(Color.LTGRAY);
         mTextPaint.setTextSize(TEXT_SIZE_SMALL);
         canvas.drawText("MOVES", movesRect.centerX(), movesRect.centerY()+ TEXT_SIZE_LARGE/3 + 60, mTextPaint);
 
@@ -1197,7 +1197,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         canvas.drawRect(footerRect, mHeaderFooterPaint);
 
         final int width = 900;
-        final int radius = RADIUS;
+        final int radius = RADIUS_SMALL;
         int spacing = (width - 3*2*radius)/2;
         int posX = (getMeasuredWidth() - width)/2 + radius;
         int posY = getMeasuredHeight() - HEADER_FOOTER_HEIGHT/2;
@@ -1228,28 +1228,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         if(mStartRect != null){
             mColorPaint.setColor(mStartRect.dotColor().colorInfo());
         }
-    }
-
-
-    private boolean isDataValid(int degree){
-        DotColor key = DotColor.valueOf(degree);
-        boolean badDot = true;
-        int currentCount = 0;
-
-        if(mGameLevel.getObjective().containsKey(key)){
-            badDot = false;
-        }
-
-        if(mDotColorCounter.containsKey(key)){
-            currentCount = mDotColorCounter.get(key);
-        }
-
-        if( (!badDot && !mGameLevel.isDotColorComplete(key) ) || currentCount < Integer.valueOf(DOT_COUNT/7)){
-            currentCount++;
-            mDotColorCounter.put(key, currentCount);
-            return true;
-        }
-        return false;
     }
 
 
@@ -1354,6 +1332,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 try {
                     if(helper != null){
                         mGameLevel = helper.getLevel(id);
+                        mGameState = new State(mGameLevel);
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -1371,7 +1350,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
     public interface GameOverListener{
-        void gameOver(Level level);
+        void gameOver(State state);
     }
 
     public void setGameOverListener(GameOverListener listener){
@@ -1477,24 +1456,30 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     @Override
     public boolean isNodeValid(int degree) {
-        DotColor key = DotColor.valueOf(degree);
-        boolean badDot = true;
-        int currentCount = 0;
-
-        if(mGameLevel.getObjective().containsKey(key)){
-            badDot = false;
-        }
-
-        if(mDotColorCounter.containsKey(key)){
-            currentCount = mDotColorCounter.get(key);
-        }
-
-        if(!badDot || currentCount < Integer.valueOf(DOT_COUNT/7)){
-            currentCount++;
-            mDotColorCounter.put(key, currentCount);
-            return true;
-        }
-        return false;
+//        DotColor key = DotColor.valueOf(degree);
+////        boolean badDot = true;
+////        boolean redDot = false;
+////        int currentCount = 0;
+////
+////        if(key == DotColor.RED){
+////            redDot = true;
+////        }
+////
+////        if(mGameLevel.getObjective().containsKey(key)){
+////            badDot = false;
+////        }
+////
+////        if(mDotColorCounter.containsKey(key)){
+////            currentCount = mDotColorCounter.get(key);
+////        }
+////
+////        if(!badDot || (redDot && currentCount < 6) || currentCount < 3 ){
+////            currentCount++;
+////            mDotColorCounter.put(key, currentCount);
+////            return true;
+////        }
+////        return false;
+        return mGameState.isNodeValid(degree);
     }
 
     @Override
