@@ -17,8 +17,6 @@ import com.nders.motif.views.GameMapView;
 
 public class LevelSelectActivity extends AppCompatActivity implements GameMapView.GameListener, ObjectiveFragment.OnStartBtnClicked{
 
-    private SoundHelper mSoundHelper;
-
     private ViewGroup mContentView;
     private GameMapView mGameMapView;
 
@@ -30,7 +28,6 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.layout_game_map);
 
-        mSoundHelper = new SoundHelper(this);
 
         mContentView = findViewById(R.id.game_map_layout);
 
@@ -62,7 +59,7 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
     @Override
     public void displayPopup(int levelId, int scrollOffset) {
 
-        mSoundHelper.playButtonClick();
+        SoundHelper.getInstance(this).playButtonClick();
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
         System.out.println(pref.getInt(Constants.KEY_HIGHEST_LEVEL, 1));
@@ -84,12 +81,19 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
         intent.putExtra(Constants.KEY_GAME_ID, levelId);
         startActivity(intent);
         overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+        SoundHelper.getInstance(this).stopMusic();
         finish();
     }
 
     @Override
     public void onCancel() {
-        mSoundHelper.playButtonClick();
+        SoundHelper.getInstance(this).playButtonClick();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        SoundHelper.getInstance(this).playMusic();
     }
 
     @Override

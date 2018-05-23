@@ -24,7 +24,17 @@ public class SoundHelper {
     private SharedPreferences mPrefs;
 
 
-    public SoundHelper(Activity activity) {
+    private static SoundHelper sInstance = null;
+
+    public static  SoundHelper getInstance(Activity activity){
+        if(sInstance == null){
+            sInstance = new SoundHelper(activity);
+        }
+        return  sInstance;
+    }
+
+
+    private SoundHelper(Activity activity) {
 
         AudioManager audioManager = (AudioManager) activity.getSystemService(Context.AUDIO_SERVICE);
         float actVolume = (float) audioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -59,7 +69,7 @@ public class SoundHelper {
 
     public void prepareMusicPlayer(Context context){
         mMusicPlayer = MediaPlayer.create(context.getApplicationContext(),
-                R.raw.pleasant_music);
+                R.raw.sneaky_snitch);
         mMusicPlayer.setVolume(.5f, .5f);
         mMusicPlayer.setLooping(true);
     }

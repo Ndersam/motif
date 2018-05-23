@@ -11,7 +11,7 @@ import android.widget.Button;
 public class HomeActivity extends AppCompatActivity {
 
 
-    private SoundHelper mSoundHelper;
+
 
 
     @Override
@@ -20,8 +20,8 @@ public class HomeActivity extends AppCompatActivity {
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         setContentView(R.layout.activity_home);
 
-        mSoundHelper = new SoundHelper(this);
-        mSoundHelper.prepareMusicPlayer(getApplicationContext());
+        SoundHelper soundHelper = SoundHelper.getInstance(this);
+        soundHelper.prepareMusicPlayer(getApplicationContext());
 
         Button btnPlay = findViewById(R.id.btn_play);
         Button btnOptions = findViewById(R.id.btn_options);
@@ -30,6 +30,7 @@ public class HomeActivity extends AppCompatActivity {
         btnPlay.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SoundHelper.getInstance(HomeActivity.this).playButtonClick();
                 Intent intent  = new Intent(HomeActivity.this, LevelSelectActivity.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
@@ -40,6 +41,7 @@ public class HomeActivity extends AppCompatActivity {
         btnOptions.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SoundHelper.getInstance(HomeActivity.this).playButtonClick();
                 Intent intent = new Intent(HomeActivity.this, AboutAndOptionsActivity.class);
                 intent.putExtra(Constants.KEY_ABOUT_OR_OPTIONS, Constants.VALUE_OPTIONS);
                 startActivity(intent);
@@ -50,6 +52,7 @@ public class HomeActivity extends AppCompatActivity {
         btnAbout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                SoundHelper.getInstance(HomeActivity.this).playButtonClick();
                 Intent intent = new Intent(HomeActivity.this, AboutAndOptionsActivity.class);
                 intent.putExtra(Constants.KEY_ABOUT_OR_OPTIONS, Constants.VALUE_ABOUT);
                 startActivity(intent);
@@ -61,13 +64,12 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        //mSoundHelper.playMusic();
+        SoundHelper.getInstance(this).playMusic();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //mSoundHelper.stopMusic();
     }
 
 }

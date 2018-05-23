@@ -16,7 +16,6 @@ public class GameActivity extends AppCompatActivity {
     /*
    *   Media
    */
-    private SoundHelper mSoundHelper;
 
 
     private GameFragment mGameFragment;
@@ -30,7 +29,7 @@ public class GameActivity extends AppCompatActivity {
         int gameID = getIntent().getIntExtra(Constants.KEY_GAME_ID, -1);
 
         // Sounds
-        mSoundHelper = new SoundHelper(this);
+
         //mSoundHelper.prepareMusicPlayer(getApplicationContext());
 
 
