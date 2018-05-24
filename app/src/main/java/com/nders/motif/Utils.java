@@ -1,5 +1,11 @@
 package com.nders.motif;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Build;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.preference.PreferenceManager;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -17,5 +23,18 @@ public class Utils {
                 | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                 | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                 | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+    }
+
+    public static void vibrate(Context context){
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        if(pref.getBoolean(Constants.KEY_VIBRATION_ENABLED, true)){
+            Vibrator vibrator =  (Vibrator)context.getSystemService(Context.VIBRATOR_SERVICE);
+            if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+                vibrator.vibrate(VibrationEffect.createOneShot(500,
+                        VibrationEffect.DEFAULT_AMPLITUDE));
+            }else{
+                vibrator.vibrate(800);
+            }
+        }
     }
 }

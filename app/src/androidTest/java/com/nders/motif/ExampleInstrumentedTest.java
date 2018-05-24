@@ -1,4 +1,4 @@
-package com.nders.nders.motif;
+package com.nders.motif;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

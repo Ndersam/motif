@@ -17,7 +17,7 @@
         android:layout_width="120dp"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_height="40dp"
-        android:background="@drawable/play_button"
+        android:background="@drawable/button_darkgreen"
         android:text="Play"
         android:textColor="@color/white"/>
 
@@ -27,7 +27,7 @@
         android:layout_width="120dp"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_height="40dp"
-        android:background="@drawable/purple_button"
+        android:background="@drawable/button_purple"
         android:text="Options"
         android:textColor="@color/white"/>
 
@@ -37,7 +37,7 @@
         android:layout_width="120dp"
         android:layout_gravity="bottom|center_horizontal"
         android:layout_height="40dp"
-        android:background="@drawable/about_button"
+        android:background="@drawable/button_about"
         android:text="About"
         android:textColor="@color/white"/>
 </LinearLayout>

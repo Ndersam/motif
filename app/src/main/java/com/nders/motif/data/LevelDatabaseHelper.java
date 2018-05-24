@@ -127,13 +127,13 @@ public class LevelDatabaseHelper extends SQLiteOpenHelper {
             values.put(COLUMN_UNLOCKED, (level.isUnlocked() ? 1: 0) );
             values.put(COLUMN_HIGHSCORE, level.highScore);
             values.put(COLUMN_MOVES, level.moves());
-            values.put(COLUMN_RED, (int)map.get(DotColor.RED));
-            values.put(COLUMN_ORANGE, (int)map.get(DotColor.ORANGE));
-            values.put(COLUMN_YELLOW, (int)map.get(DotColor.YELLOW));
-            values.put(COLUMN_GREEN, (int)map.get(DotColor.GREEN));
-            values.put(COLUMN_BLUE, (int)map.get(DotColor.BLUE));
-            values.put(COLUMN_INDIGO, (int)map.get(DotColor.INDIGO));
-            values.put(COLUMN_VIOLET, (int)map.get(DotColor.VIOLET));
+            values.put(COLUMN_RED, (map.containsKey(DotColor.RED)? (int)map.get(DotColor.RED): 0));
+            values.put(COLUMN_ORANGE, (map.containsKey(DotColor.ORANGE)? (int)map.get(DotColor.ORANGE): 0));
+            values.put(COLUMN_YELLOW, (map.containsKey(DotColor.YELLOW)? (int)map.get(DotColor.YELLOW): 0));
+            values.put(COLUMN_GREEN, (map.containsKey(DotColor.GREEN)? (int)map.get(DotColor.GREEN): 0));
+            values.put(COLUMN_BLUE, (map.containsKey(DotColor.BLUE)? (int)map.get(DotColor.BLUE): 0));
+            values.put(COLUMN_INDIGO, (map.containsKey(DotColor.INDIGO)? (int)map.get(DotColor.INDIGO): 0));
+            values.put(COLUMN_VIOLET, (map.containsKey(DotColor.VIOLET)? (int)map.get(DotColor.VIOLET): 0));
 
             // Try to update the level
             int rows = db.update(TABLE_LEVELS, values, COLUMN_ID + "= ?",
@@ -147,6 +147,8 @@ public class LevelDatabaseHelper extends SQLiteOpenHelper {
                 if(cursor.moveToFirst()){
                     success = true;
                     db.setTransactionSuccessful();
+
+                    Log.i(TAG, "Level Updated");
                 }
             }
 
@@ -216,16 +218,11 @@ public class LevelDatabaseHelper extends SQLiteOpenHelper {
         SQLiteDatabase db = getReadableDatabase();
         if(db == null) return null;
         Cursor cursor = null;
-//        String query = "SELECT * FROM " + TABLE_LEVELS +
-//                " WHERE " + COLUMN_ID + " = ?";
-
         String query = "SELECT * FROM " + TABLE_LEVELS + " WHERE " + COLUMN_ID + " == " + id + ";";
-        String q = "SELECT * FROM " + TABLE_LEVELS + " WHERE " + COLUMN_ID + " == ?;";
-//        Log.i(TAG, db.getPath());
+
 
         Level level = null;
         try{
-//            cursor = db.rawQuery(q, new String[]{String.valueOf(id)});
             cursor = db.rawQuery(query, null);
             if(cursor.moveToFirst()){
                 boolean unlocked = cursor.getInt(KEY_UNLOCKED) > 0;

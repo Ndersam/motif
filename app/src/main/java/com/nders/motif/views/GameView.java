@@ -19,6 +19,8 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 
 import com.nders.motif.R;
+import com.nders.motif.SoundHelper;
+import com.nders.motif.Utils;
 import com.nders.motif.data.LevelDatabaseHelper;
 import com.nders.motif.entities.Circle;
 import com.nders.motif.entities.DotColor;
@@ -226,7 +228,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     protected boolean mInitialized = false;
 
     // Is true when the associated activity is not paused and is in focus.
-    protected boolean mRunning = false;
+    protected volatile boolean mRunning = false;
 
     // Is true when the surface is ready, data has been loaded and the game has been ...
     // ... initialized.
@@ -470,6 +472,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                             mStartRect.select();
                             mSelectedDotColor = mStartRect.dotColor();
                             mSelectedDots.push(mStartRect);
+
+                            SoundHelper.getInstance((Activity)getContext()).playKickSound();
                             break;
                         }
                     }
@@ -563,6 +567,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                                 // push rectangle onto stack
                                                 rect.select();
                                                 mSelectedDots.push(rect);
+                                                SoundHelper.getInstance((Activity)getContext()).playKickSound();
 
 //                                                double distFromLastDot = Math.sqrt(Math.pow(mLines.peek().endX - mx_raw, 2) +
 //                                                        Math.pow(mLines.peek().endY - my_raw, 2));
@@ -598,12 +603,19 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
                                         List<Line> lines = new ArrayList<>();
 
+                                        // Get the last added line
                                         int i = mLines.size() - 1;
                                         Line temp = new Line(mLines.get(i));
 
                                         Log.i(TAG, String.format("(%03d, %03d)",
                                                 mLines.get(i).startId, mLines.get(i).endId) + " " + mLines.get(i).type());
 
+                                        // Concatenate lines that are of the same type.
+                                        // Two line are said to be of the same type if they share end points and are both horizontal
+                                        // or both vertical.
+                                        // Find 3 concatenated lines (if exists)
+                                        // If 3 concatenated lines exists and they form an opened rectangle, and the line to be added ...
+                                        // ... shares a point with the line to be added, a path has been closed.
                                         for(i = mLines.size() - 2; i >= 0; i--){
 
                                             Log.i(TAG, String.format("(%03d, %03d)",
@@ -616,13 +628,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                                 temp = new Line(mLines.get(i));
                                             }
 
-                                            // closed path found
-                                            if(lines.size() >= 3)
+                                            // closed path found?
+                                            if(temp.startId == rect.id()){
+                                                lines.add(temp);
                                                 break;
-                                        }
-
-                                        if(i < 0){
-                                            lines.add(temp);
+                                            }
                                         }
 
                                         Log.i(TAG, "*********Lines***********");
@@ -630,10 +640,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                             Log.i(TAG, String.format("(%03d, %03d)",
                                                     l.startId, l.endId) + " " + l.type());
                                         }
-                                        if(lines.size() >= 3 && mIsDrawing){
+                                        if(lines.size() >= 3 && mIsDrawing && lines.get(lines.size() - 1).startId == rect.id()){
                                             mIsRectFormed = true;
                                             mLines.push(line);
                                             mIsDrawing = false;
+                                            Utils.vibrate(getContext().getApplicationContext());
                                         }else{
                                             Log.i(TAG, "Not a Closed Path: " + lines.size());
                                         }
@@ -1442,29 +1453,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     @Override
     public boolean isNodeValid(int degree) {
-//        DotColor key = DotColor.valueOf(degree);
-////        boolean badDot = true;
-////        boolean redDot = false;
-////        int currentCount = 0;
-////
-////        if(key == DotColor.RED){
-////            redDot = true;
-////        }
-////
-////        if(mGameLevel.getObjective().containsKey(key)){
-////            badDot = false;
-////        }
-////
-////        if(mDotColorCounter.containsKey(key)){
-////            currentCount = mDotColorCounter.get(key);
-////        }
-////
-////        if(!badDot || (redDot && currentCount < 6) || currentCount < 3 ){
-////            currentCount++;
-////            mDotColorCounter.put(key, currentCount);
-////            return true;
-////        }
-////        return false;
         return mGameState.isNodeValid(degree);
     }
 

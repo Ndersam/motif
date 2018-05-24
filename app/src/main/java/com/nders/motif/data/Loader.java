@@ -1,9 +1,11 @@
 package com.nders.motif.data;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.database.Cursor;
 import android.database.SQLException;
 import android.os.AsyncTask;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import com.nders.motif.Constants;
@@ -110,10 +112,11 @@ public class Loader{
                 " WHERE source== " +  String.valueOf(srcID) +
                 " and target == " + String.valueOf(dstID) + ";";
 
-        //Cursor edgeCursor = mSQLiteDB.rawQuery(query, null);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(mContext.getApplicationContext());
+
         Cursor edgeCursor = mMotifDatabaseHelper.rawQuery(query, null);
         if(edgeCursor.moveToFirst()) {
-            if(edgeCursor.getInt(MotifDatabaseHelper.KEY_WEIGHT) >= Constants.EDGE_THRESHOLD) {
+            if(edgeCursor.getInt(MotifDatabaseHelper.KEY_WEIGHT) >= pref.getFloat(Constants.KEY_EDGE_THRESHOLD, Constants.EDGE_THRESHOLD)) {
                 edgeExists = true;
             }
         }

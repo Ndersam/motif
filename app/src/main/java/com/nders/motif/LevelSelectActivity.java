@@ -26,7 +26,7 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        setContentView(R.layout.layout_game_map);
+        setContentView(R.layout.activity_gamemap);
 
 
         mContentView = findViewById(R.id.game_map_layout);

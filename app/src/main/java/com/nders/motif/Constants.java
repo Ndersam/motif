@@ -13,11 +13,11 @@ public  class Constants {
     public static final int MAX_NODE_COUNT = 519;
     public static final int GRAPH_COUNT = 23;
     public static final double NO_EDGE_SCORE = -1.0;
-    public static double EDGE_THRESHOLD = 4.0;
+
     public static int DEGREE_THRESHOLD = 148;
 
 
-    public enum DATASIZE {SIZE_5, SIZE_10, SIZE_16};
+
     public static final String[] DATA16 =
             {
                     "(85, 318, 344, 239, 132, 134, 174, 471, 447, 274, 452, 112, 200, 418, 306, 80)",
@@ -127,8 +127,6 @@ public  class Constants {
             };
 
 
-    public static final double[]  MAX10 = {430};
-
 
     /*
     *   Shared Preferences Keys
@@ -137,7 +135,7 @@ public  class Constants {
     public static final String KEY_MUSIC_ENABLED = "music";
     public static final String KEY_SCREEN_WIDTH = "screen_width";
     public static final String KEY_SCREEN_HEIGHT = "screen_height";
-    public static String KEY_MAP_RECT_BOTTOM = "scroll_offset";
+    public static final String KEY_MAP_RECT_BOTTOM = "scroll_offset";
     public static final String KEY_HIGHEST_LEVEL = "highest_level";
     public static final String KEY_VIBRATION_ENABLED = "vibration_enabled";
     public static final String KEY_MUSIC_LEVEL = "music_level";
@@ -148,6 +146,7 @@ public  class Constants {
     public static final String NORMAL_MODE = "normal_mode";
     public static final String HARD_MODE = "hard_mode";
     public static final String EXTREME_MODE = "extreme_mode";
+    public static final String KEY_EDGE_THRESHOLD = "edge_threshold";
 
 
     /*
@@ -165,5 +164,10 @@ public  class Constants {
     public static final String KEY_GAME_ID = "game_ID";
     public static final String KEY_GAME_SCORE = "game_score";
     public static final int MAX_LEVEL = 23;
+
+    /*
+    *   Game difficulty
+     */
+    public static float EDGE_THRESHOLD = 1f;
 
 }

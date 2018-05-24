@@ -17,7 +17,7 @@ import android.util.Log;
 public class SoundHelper {
     private MediaPlayer mMusicPlayer;
     private SoundPool mSoundPool;
-    private int mErrorSoundID;
+    private int mKickId;
     private int mClickId;
     private boolean mLoaded;
     private float mVolume;
@@ -60,7 +60,8 @@ public class SoundHelper {
                 mLoaded = true;
             }
         });
-        mErrorSoundID = mSoundPool.load(activity, R.raw.bottle_break, 2);
+
+        mKickId = mSoundPool.load(activity, R.raw.kick, 2);
         mClickId = mSoundPool.load(activity, R.raw.multimedia_button_click_021, 1);
 
         mPrefs = PreferenceManager.getDefaultSharedPreferences(activity.getApplicationContext());
@@ -101,9 +102,9 @@ public class SoundHelper {
         }
     }
 
-    public void playErrorSound(){
+    public void playKickSound(){
         if (mLoaded && mPrefs.getBoolean(Constants.KEY_SOUND_ENABLED, true)) {
-            mSoundPool.play(mErrorSoundID, mVolume, mVolume, 1, 0, 1f);
+            mSoundPool.play(mKickId, mVolume, mVolume, 1, 0, 1f);
         }
     }
 }

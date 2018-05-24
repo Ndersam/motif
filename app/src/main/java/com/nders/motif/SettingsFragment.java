@@ -12,7 +12,6 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.SeekBar;
-import android.widget.Switch;
 
 
 public class SettingsFragment extends Fragment {
@@ -114,10 +113,24 @@ public class SettingsFragment extends Fragment {
                 String tag = pref.getString(Constants.KEY_GAME_DIFFICULTY, Constants.NORMAL_MODE);
                 Button btn = mContentView.findViewWithTag(tag);
                 if(btn != null){
-                    btn.setBackground(getResources().getDrawable(R.drawable.unchecked_button, null));
+                    btn.setBackground(getResources().getDrawable(R.drawable.button_unchecked, null));
                 }
                 pref.edit().putString(Constants.KEY_GAME_DIFFICULTY, (String)v.getTag()).apply();
-                v.setBackground(getResources().getDrawable(R.drawable.checked_button, null));
+                v.setBackground(getResources().getDrawable(R.drawable.button_checked, null));
+                float difficulty;
+
+                if(Constants.EASY_MODE.compareTo((String)v.getTag()) == 0){
+                    difficulty = 1f;
+                }else if(Constants.NORMAL_MODE.compareTo((String)v.getTag()) == 0){
+                    difficulty = 2f;
+                }else if(Constants.HARD_MODE.compareTo((String)v.getTag()) == 0){
+                    difficulty = 3f;
+                }else{
+                    // Constants.EXTREME_MODE
+                    difficulty = 4f;
+                }
+
+                pref.edit().putFloat(Constants.KEY_EDGE_THRESHOLD, difficulty).apply();
             }
         };
 
@@ -134,10 +147,26 @@ public class SettingsFragment extends Fragment {
         btnExtremeMode.setOnClickListener(difficultyListener);
 
 
+        // Check current difficulty
         String tag = pref.getString(Constants.KEY_GAME_DIFFICULTY, Constants.NORMAL_MODE);
         Button btn = mContentView.findViewWithTag(tag);
         if(btn != null){
-            btn.setBackground(getResources().getDrawable(R.drawable.checked_button, null));
+            btn.setBackground(getResources().getDrawable(R.drawable.button_checked, null));
+
+            float difficulty;
+
+            if(Constants.EASY_MODE.compareTo((String)btn.getTag()) == 0){
+                difficulty = 1f;
+            }else if(Constants.NORMAL_MODE.compareTo((String)btn.getTag()) == 0){
+                difficulty = 2f;
+            }else if(Constants.HARD_MODE.compareTo((String)btn.getTag()) == 0){
+                difficulty = 3f;
+            }else{
+                // Constants.EXTREME_MODE
+                difficulty = 4f;
+            }
+
+            pref.edit().putFloat(Constants.KEY_EDGE_THRESHOLD, difficulty).apply();
         }
 
 
