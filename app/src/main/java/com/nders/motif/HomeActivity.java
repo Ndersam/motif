@@ -70,6 +70,7 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        SoundHelper.getInstance(this).pauseMusic();
     }
 
 }

@@ -97,6 +97,12 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
     }
 
     @Override
+    protected void onPause() {
+        super.onPause();
+        SoundHelper.getInstance(this).pauseMusic();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
