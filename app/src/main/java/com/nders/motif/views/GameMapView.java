@@ -328,6 +328,10 @@ public class GameMapView extends View {
         }
 
         // level 23
+        path.moveTo(leftRect.left + RECT_WIDTH /2 + RECT_WIDTH, leftRect.bottom);
+        path.lineTo(  leftRect.left+ RECT_WIDTH /2, leftRect.bottom);
+        level++;
+        mLocations.add(new Circle(leftRect.left + 100, leftRect.bottom, RADIUS, level));
 
         /////////////////////////////////////////////////////////////////////////////////////////
         /////////////////////////////////////////////////////////////////////////////////////////

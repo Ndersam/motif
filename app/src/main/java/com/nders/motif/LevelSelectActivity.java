@@ -39,7 +39,6 @@ public class LevelSelectActivity extends AppCompatActivity implements GameMapVie
         });
 
 
-
         mGameMapView = findViewById(R.id.game_map);
         mGameMapView.setGameListener(this);
 
