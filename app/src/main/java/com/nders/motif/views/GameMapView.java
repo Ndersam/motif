@@ -58,13 +58,13 @@ public class GameMapView extends View {
     private int mMapWidth = 1440;
 
     // COLORS
-    private final int BACKGROUND_COLOR = Color.parseColor("#324056") ;//Color.parseColor("#DF8E57");
-    private final int PATH_COLOR = Color.WHITE;//Color.parseColor("#B16248");
-    private final int DASH_PATH_COLOR = Color.parseColor("#223046") ;
-    private final int SHADOW_COLOR =  Color.parseColor("#202020") ;//Color.parseColor("#CC703E");
+    private final int BACKGROUND_COLOR = Color.parseColor("#324056");
+    private final int PATH_COLOR = Color.parseColor("#FFF3D1");
+    private final int DASH_PATH_COLOR = Color.parseColor("#D17C4B");
+    private final int SHADOW_COLOR =  Color.parseColor("#202020");
     private final int LOCKED_COLOR = Color.parseColor("#EDD7B0");
-    private final int TEXT_COLOR = Color.parseColor("#8A3F3C"); //AC5F47
-    private final int UNLOCKED_COLOR = Color.parseColor("#ffc6f9e5") ;//Color.parseColor("#D77D4B");
+    private final int TEXT_COLOR = Color.parseColor("#8A3F3C");
+    private final int UNLOCKED_COLOR = Color.parseColor("#FAC55C");
 
     private static final String TAG = GameMapView.class.getSimpleName();
 
@@ -112,8 +112,7 @@ public class GameMapView extends View {
 
         mPathPaint.setStyle(Paint.Style.STROKE);
         mPathPaint.setStrokeWidth(STROKE_WIDTH);
-        //mPathPaint.setColor(PATH_COLOR);
-        mPathPaint.setColor(Color.parseColor("#FFFFFF"));
+        mPathPaint.setColor(PATH_COLOR);
         mPathPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
 
@@ -379,14 +378,41 @@ public class GameMapView extends View {
         //====================================================
 
         // draw background
-        int c = Color.parseColor("#DB8752");
+        int c = Color.parseColor("#DA8D58");
         mCanvas.drawColor(c, PorterDuff.Mode.SRC_OVER);
         mPaint.setColor(Color.parseColor("#D67D4A"));
 
-        for(int i = 1; i < 6; i++){
+        for(int i = 1; i < 5; i++){
             int x = getMeasuredWidth()/5 * i;
+
             mCanvas.drawLine(x,0,x,mFullMap.getHeight(), mPaint);
+
+            float s = mPaint.getStrokeWidth();
+            for(int j = 0; j < 3; j++){
+                x -= getMeasuredWidth()/20;
+                mPaint.setStrokeWidth(5);
+                mPaint.setPathEffect(new DashPathEffect(new float[]{60, 100*(j+1)}, 0));
+                mCanvas.drawLine(x,0,x,mFullMap.getHeight(), mPaint);
+
+            }
+
+            if(i == 4){
+                x = getMeasuredWidth()/5 * (i +1);
+                for(int j = 0; j < 3; j++){
+                    x -= getMeasuredWidth()/20;
+                    mPaint.setStrokeWidth(5);
+                    mPaint.setPathEffect(new DashPathEffect(new float[]{60, 100*(j+1)}, 0));
+                    mCanvas.drawLine(x,0,x,mFullMap.getHeight(), mPaint);
+
+                }
+            }
+            mPaint.setStrokeWidth(s);
+            mPaint.setPathEffect(null);
         }
+
+
+
+
 
         // draw paths
 

@@ -3,8 +3,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.nders.motif">
 
-    <uses-permission android:name="android.permission.VIBRATE"/>
-    <uses-permission-sdk-23 android:name="android.permission.VIBRATE"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+
+    <uses-permission-sdk-23 android:name="android.permission.VIBRATE" />
 
     <application xmlns:tools="http://schemas.android.com/tools"
         android:allowBackup="false"
@@ -53,7 +54,8 @@
             android:name=".data.DataInitService"
             android:exported="false" />
 
-        <activity android:name=".AboutAndOptionsActivity"></activity>
+        <activity android:name=".AboutAndOptionsActivity" />
+        <activity android:name=".TutorialActivity"></activity>
     </application>
 
 </manifest>
