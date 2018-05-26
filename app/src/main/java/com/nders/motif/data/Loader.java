@@ -33,6 +33,8 @@ public class Loader{
     private int mCount;
     private int mGraphNumber;
 
+    private boolean mLoadAll = true;
+
     private LoaderListener mLoaderListener =  null;
 
     public Loader(Context context, int count){
@@ -72,6 +74,14 @@ public class Loader{
         new NodesLoaderTask().execute();
     }
 
+    public void loadHandPicked(String[] ids){
+        disableLoadAll();
+        new NodesLoaderTask().execute(ids);
+    }
+
+    public void disableLoadAll(){
+        mLoadAll = false;
+    }
 
     /**
      * Checks edgeMap for the value of an edge.
@@ -142,12 +152,15 @@ public class Loader{
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
 
-    private class NodesLoaderTask extends AsyncTask<Void, ArrayList<DotNode> , ArrayList<DotNode> > {
+    private class NodesLoaderTask extends AsyncTask<String[], ArrayList<DotNode> , ArrayList<DotNode> > {
 
         @Override
         protected void onPostExecute(ArrayList<DotNode> values) {
             super.onPostExecute(values);
-            if(mLoaderListener != null) mLoaderListener.onLoadBuffer(new ArrayList<DotNode>(values));
+            if(mLoadAll){
+                if(mLoaderListener != null)
+                    mLoaderListener.onLoadBuffer(new ArrayList<DotNode>(values));
+            }
         }
 
         @Override
@@ -157,7 +170,7 @@ public class Loader{
         }
 
         @Override
-        protected ArrayList<DotNode> doInBackground(Void... voids) {
+        protected ArrayList<DotNode> doInBackground(String[]... params) {
             ArrayList<DotNode> startingNodes = new ArrayList<>();
             ArrayList<DotNode> allNodes = new ArrayList<>();
 
@@ -165,8 +178,21 @@ public class Loader{
             if(mNodeCursor == null){
                 String nodeTableName = String.format("motifdata%02d_nodes", mGraphNumber);
                 Log.i(TAG, "NODE LOADER CALLED");
-                mNodeCursor = mMotifDatabaseHelper.query(nodeTableName, null, null,
-                        null, "RANDOM()", null, null);
+
+                if(params.length < 1){
+                    mNodeCursor = mMotifDatabaseHelper.query(nodeTableName, null, null,
+                            null, "RANDOM()", null, null);
+                }else{
+                    String selection = "id IN (?";
+                    for(int i = 1; i < params[0].length; i++)
+                        selection += ", ?";
+                    selection += " )";
+                    mNodeCursor = mMotifDatabaseHelper.query(nodeTableName, null,
+                            selection,
+                            params[0], null, null, null);
+                    mCount = params[0].length;
+                }
+
             }
 
             if (mNodeCursor.moveToFirst()) {

@@ -1,7 +1,8 @@
 package com.nders.motif.game;
 
+import com.nders.motif.entities.Dot;
 import com.nders.motif.entities.DotColor;
-import com.nders.motif.entities.Rectangle;
+
 
 import java.util.EnumMap;
 import java.util.Stack;
@@ -61,7 +62,7 @@ public class State {
     /**
      * Updates game score, the count of "dotColor" and updates the dotColorCounter
      */
-    public void update(DotColor selectedColor, Stack<Rectangle> selected, boolean rectFormed){
+    public void update(DotColor selectedColor, Stack<Dot> selected, boolean rectFormed){
 
         mMovesLeft--;
 
@@ -73,7 +74,7 @@ public class State {
             mScore += selected.size() *(rectFormed? 2: 1);
         }
 
-        for(Rectangle dot: selected){
+        for(Dot dot: selected){
             if(mProgressCounter.containsKey(dot.dotColor())){
                 if(!isROYDot(dot.dotColor())){
                     mGoodNonROYDots--;

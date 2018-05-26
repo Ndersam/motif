@@ -23,10 +23,10 @@ import com.nders.motif.SoundHelper;
 import com.nders.motif.Utils;
 import com.nders.motif.data.LevelDatabaseHelper;
 import com.nders.motif.entities.Circle;
+import com.nders.motif.entities.Dot;
 import com.nders.motif.entities.DotColor;
 import com.nders.motif.entities.DotNode;
 import com.nders.motif.entities.Line;
-import com.nders.motif.entities.Rectangle;
 import com.nders.motif.data.Loader;
 import com.nders.motif.game.Level;
 import com.nders.motif.game.State;
@@ -101,17 +101,14 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     protected int HEADER_FOOTER_COLOR = Color.parseColor("#FFF6D5");
     protected int SCORE_COLOR =  HEADER_FOOTER_COLOR;
     protected int TEXT_COLOR = Color.parseColor("#202020");
-    protected int TEXT_MOVES_COLOR = Color.parseColor("#717171");//Color.LTGRAY; //Color.parseColor("#FFC107");
+    protected int TEXT_MOVES_COLOR = Color.parseColor("#717171");
+
     // Paints
     protected Paint mTextPaint;
-    protected Paint mBlackPathPaint;
-    protected Paint mWhitePaint;
-    protected Paint mWhitePathPaint;
-    protected Paint mBlackPaint;
-    protected Paint mColorPaint;
-    protected Paint mColorPathPaint;
-    protected Paint mBackgroundPathPaint;
-    protected Paint mBackgroundPaint;
+    protected Paint mTickMarkPaint;
+    protected Paint mBlackDotPaint;
+    protected Paint mColorDotPaint;
+    protected Paint mPathPaint;
     protected Paint mHeaderFooterPaint;
 
     // Tracks the position of the initial dot touched when a player is about connect ...
@@ -135,10 +132,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     protected static final float TOUCH_STROKE_WIDTH = 40;
     protected static final float TOUCH_TOLERANCE = 2;
-    protected static final float RECT_TOLERANCE = 4;
-
-
-
 
 
     /**
@@ -146,24 +139,24 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
      */
 
     // Keeps track of the stationary dots drawn on screen.
-    protected Stack<List<Rectangle>> mRectangles;
+    protected List<List<Dot>> mDotRows = new ArrayList<>();
 
     // Temporary variables for initializing the game
     protected List<Circle> mCircles = new ArrayList<>();
-    protected List<Circle> mBufferCircles = new ArrayList<>();
+
 
     // Keeps track of all the lines drawn
-    protected Stack<Line> mLines;
+    protected Stack<Line> mLines = new Stack<>();
 
     // Stores the first selected dot
-    protected Rectangle mStartRect = null;
-    private DotColor mSelectedDotColor = null;
+    protected Dot mStartDot = null;
+
 
     // Stores all the dots that have been connected
     // The contents of this container get swapped with other dots ...
     // ... that appear above them and have not been selected (connected).
     // This occurs if and only if the size of the container is greater than one.
-    protected Stack<Rectangle> mSelectedDots;
+    protected Stack<Dot> mSelectedDots = new Stack<>();
 
 
     /**
@@ -175,18 +168,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // ... edge (boolean) is the value.
     protected HashMap<ArrayList, Boolean> mEdges = new HashMap<>();
 
-    // The number of dots displayed on the screen.
-    // This corresponds to the size of a game.
-    protected static final int DOT_COUNT = MAX_COLUMN_COUNT* MAX_ROW_COUNT;
-
-    // List of objects containing the graph nodes loaded from the database.
-    // These are nodes displayed on the screen as colored dots.
-    // There are "DOT_COUNT" number of graph nodes.
-    protected List<DotNode> mGraphNodes;
+    protected List<DotNode> mStartingNodes;
 
     // List of remaining nodes loaded from the database.
     // The content of this container are gradually removed and used to replace ...
-    // .. selected dots in "mGraphNodes".
+    // .. selected dots in "mStartingNodes".
     protected List<DotNode> mNodes = new ArrayList<>();
 
     // The size of buffer
@@ -200,7 +186,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
      **  ANIMATION
      */
 
-    static final int ANIM_START_POS = HEADER_FOOTER_HEIGHT * 2;
     static int TIME_DELAY;
 
 
@@ -257,7 +242,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // The current game state
     protected State mGameState = null;
 
-    protected boolean mIsRectFormed = false;
+    protected boolean mAPathClosed = false;
 
     /**
      **   MISC
@@ -304,82 +289,42 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
 
         // Paints
-        mBackgroundPaint = new Paint();
-        mBackgroundPaint.setAntiAlias(true);
-        mBackgroundPaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        mBackgroundPaint.setColor(BACKGROUND_COLOR);
-        mBackgroundPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
-        mBackgroundPathPaint = new Paint();
-        mBackgroundPathPaint.setAntiAlias(true);
-        mBackgroundPathPaint.setStyle(Paint.Style.STROKE);
-        mBackgroundPathPaint.setStrokeWidth(TOUCH_STROKE_WIDTH + 4);
-        mBackgroundPathPaint.setDither(true);
-        mBackgroundPathPaint.setStrokeJoin(Paint.Join.ROUND);
-        mBackgroundPathPaint.setStrokeCap(Paint.Cap.ROUND);
-        mBackgroundPathPaint.setColor(BACKGROUND_COLOR);
-        mBackgroundPathPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+        mColorDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
+        mColorDotPaint.setStyle(Paint.Style.FILL);
+        mColorDotPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
+        mBlackDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
+        mBlackDotPaint.setStyle(Paint.Style.FILL);
+        mBlackDotPaint.setColor(getContext().getColor(R.color.black));
+        mBlackDotPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
-        mBlackPathPaint = new Paint();
-        mBlackPathPaint.setAntiAlias(true);
-        mBlackPathPaint.setDither(true);
-        mBlackPathPaint.setStyle(Paint.Style.STROKE);
-        mBlackPathPaint.setStrokeWidth(TOUCH_STROKE_WIDTH);
-        mBlackPathPaint.setStrokeCap(Paint.Cap.ROUND);
-        mBlackPathPaint.setStrokeJoin(Paint.Join.ROUND);
-        mBlackPathPaint.setColor(getContext().getColor(R.color.black));
-        mBlackPathPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+        mTickMarkPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
+        mTickMarkPaint.setStyle(Paint.Style.STROKE);
+        mTickMarkPaint.setStrokeWidth(8);
+        mTickMarkPaint.setStrokeJoin(Paint.Join.ROUND);
+        mTickMarkPaint.setStrokeCap(Paint.Cap.ROUND);
+        mTickMarkPaint.setColor(Color.WHITE);
+        mTickMarkPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
-        mBlackPaint = new Paint();
-        mBlackPaint.setAntiAlias(true);
-        mBlackPaint.setDither(true);
-        mBlackPaint.setStyle(Paint.Style.FILL);
-        mBlackPaint.setColor(getContext().getColor(R.color.black));
-        mBlackPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
-
-        mWhitePaint = new Paint();
-        mWhitePaint.setAntiAlias(true);
-        mWhitePaint.setStyle(Paint.Style.FILL_AND_STROKE);
-        mWhitePaint.setColor(getContext().getColor(R.color.white));
-        mWhitePaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
-
-        mWhitePathPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
-        mWhitePathPaint.setStyle(Paint.Style.STROKE);
-        mWhitePathPaint.setStrokeWidth(8);
-        mWhitePathPaint.setStrokeJoin(Paint.Join.ROUND);
-        mWhitePathPaint.setStrokeCap(Paint.Cap.ROUND);
-        mWhitePathPaint.setColor(Color.WHITE);
-        mWhitePathPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
-
-        mColorPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
-        mColorPaint.setStyle(Paint.Style.FILL);
-        mColorPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
-
-        mColorPathPaint = new Paint();
-        mColorPathPaint.setStyle(Paint.Style.FILL);
-        mColorPathPaint.setDither(true);
-        mColorPathPaint.setAntiAlias(true);
-        mColorPathPaint.setStrokeCap(Paint.Cap.ROUND);
-        mColorPathPaint.setStrokeJoin(Paint.Join.ROUND);
-        mColorPathPaint.setStrokeWidth(TOUCH_STROKE_WIDTH);
-        mColorPathPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
+        mPathPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
+        mPathPaint.setStyle(Paint.Style.STROKE);
+        mPathPaint.setStrokeCap(Paint.Cap.ROUND);
+        mPathPaint.setStrokeJoin(Paint.Join.ROUND);
+        mPathPaint.setStrokeWidth(TOUCH_STROKE_WIDTH);
+        mPathPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
         mTextPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
         mTextPaint.setStyle(Paint.Style.FILL);
         mTextPaint.setColor(TEXT_COLOR);
         mTextPaint.setStrokeWidth(TOUCH_STROKE_WIDTH - 2);
         mTextPaint.setTextAlign(Paint.Align.CENTER);
+        mTextPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
         mHeaderFooterPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
         mHeaderFooterPaint.setStyle(Paint.Style.FILL);
         mHeaderFooterPaint.setColor(HEADER_FOOTER_COLOR);
-
-        // Keeping track of dots and User drawings
-        mRectangles = new Stack<>();
-        mCircles = new ArrayList<>();
-        mLines = new Stack<>();
-        mSelectedDots = new Stack<>();
+        mHeaderFooterPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
 
         // Data Loader
@@ -431,7 +376,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     public void onWindowFocusChanged(boolean hasFocus) {
         if(!hasFocus){
             pause();
-        }else {
+        }else{
             resume();
         }
         mState = STATE.RESET;
@@ -461,31 +406,30 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 mIsDrawing = true;
                 mStartX = mx;
                 mStartY = my;
-                for(List<Rectangle> list: mRectangles){
-                    for(Rectangle rect: list){
-                        if(rect.contains(mStartX, mStartY)){
-                            mStartX = rect.getX();
-                            mStartY = rect.getY();
-                            mStartRect = rect;
-                            mColorPaint.setColor(mStartRect.dotColor().colorInfo());
-                            mColorPathPaint.setColor(mStartRect.dotColor().colorInfo());
-                            mStartRect.select();
-                            mSelectedDotColor = mStartRect.dotColor();
-                            mSelectedDots.push(mStartRect);
+                for(List<Dot> list: mDotRows){
+                    for(Dot dot: list){
+                        if(dot.contains(mStartX, mStartY)){
+                            mStartX = dot.centreX();
+                            mStartY = dot.centreY();
+                            mStartDot = dot;
+                            mColorDotPaint.setColor(mStartDot.color());
+                            mPathPaint.setColor(mStartDot.color());
+                            mStartDot.select();
+                            mSelectedDots.push(mStartDot);
 
                             SoundHelper.getInstance((Activity)getContext()).playKickSound();
                             break;
                         }
                     }
                 }
-                if(mStartRect != null){
+                if(mStartDot != null){
                     mState = STATE.ACTION_DOWN;
                 }else{
                     mState = STATE.DO_NOTHING;
                 }
                 break;
             case MotionEvent.ACTION_MOVE:
-                if(mStartRect == null){
+                if(mStartDot == null){
                     break;
                 }
                 if(!mIsDrawing){
@@ -493,21 +437,21 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                     break;
                 }
 
-                for(List<Rectangle> list: mRectangles){
-                    for(Rectangle rect: list){
+                for(List<Dot> list: mDotRows){
+                    for(Dot dot: list){
                         //==============================================================
                         // IF "rect" CONTAINS THE COORDINATE, {mx, my},...
                         // A LINE COULD BE DRAWN
                         //==============================================================
-                        if(rect.contains(mx, my)){
+                        if(dot.contains(mx, my)){
                             float mx_raw = mx; // save raw current x value
                             float my_raw = my; // save raw current y value
-                            mx = rect.getX();
-                            my = rect.getY();
+                            mx = dot.centreX();
+                            my = dot.centreY();
 
-                            // rect.id() != mStartRect.id() &&
-                            if(!rect.isSelected()){
-                                if(mDataLoader.checkEdge(mStartRect.id(), rect.id(), mEdges)) {
+                            // rect.id() != mStartDot.id() &&
+                            if(!dot.isSelected()){
+                                if(mDataLoader.checkEdge(mStartDot.id(), dot.id(), mEdges)) {
                                     //=========================================================
                                     // IF LINE TO BE DRAWN IS NON-DIAGONAL
                                     //=========================================================
@@ -516,7 +460,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                         // new line to be added
                                         Line line = new Line(mStartX, mStartY, mx, my);
                                         line.startId = mSelectedDots.peek().id();
-                                        line.endId = rect.id();
+                                        line.endId = dot.id();
 
                                         //========================================================
                                         // BACKTRACK (IF CONDITION IS MEANT)
@@ -559,14 +503,14 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                             //==========================================================
                                             // IF RECTANGLE HASN'T BEEN CONNECTED
                                             //==========================================================
-                                            if (!rect.isSelected()) {
+                                            if (!dot.isSelected()) {
                                                 mLines.push(line);
                                                 mStartX = mx;
                                                 mStartY = my;
 
                                                 // push rectangle onto stack
-                                                rect.select();
-                                                mSelectedDots.push(rect);
+                                                dot.select();
+                                                mSelectedDots.push(dot);
                                                 SoundHelper.getInstance((Activity)getContext()).playKickSound();
 
 //                                                double distFromLastDot = Math.sqrt(Math.pow(mLines.peek().endX - mx_raw, 2) +
@@ -584,7 +528,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                 //=================================================
                                 // CLOSE PATH
                                 //=================================================
-                                if(mSelectedDots.peek().id() == rect.id()){
+                                if(mSelectedDots.peek().id() == dot.id()){
                                     break;
                                 }
 
@@ -594,7 +538,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                     // new line to be added
                                     Line line = new Line(mStartX, mStartY, mx, my);
                                     line.startId = mSelectedDots.peek().id();
-                                    line.endId = rect.id();
+                                    line.endId = dot.id();
 
                                     // To close a rectangular path 4 lines are needed.
                                     // If mLines has at least 3 lines, close path
@@ -629,7 +573,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                             }
 
                                             // closed path found?
-                                            if(temp.startId == rect.id()){
+                                            if(temp.startId == dot.id()){
                                                 lines.add(temp);
                                                 break;
                                             }
@@ -640,8 +584,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                                             Log.i(TAG, String.format("(%03d, %03d)",
                                                     l.startId, l.endId) + " " + l.type());
                                         }
-                                        if(lines.size() >= 3 && mIsDrawing && lines.get(lines.size() - 1).startId == rect.id()){
-                                            mIsRectFormed = true;
+                                        if(lines.size() >= 3 && mIsDrawing && lines.get(lines.size() - 1).startId == dot.id()){
+                                            mAPathClosed = true;
                                             mLines.push(line);
                                             mIsDrawing = false;
                                             Utils.vibrate(getContext().getApplicationContext());
@@ -661,7 +605,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 mState = STATE.MOVING;
                 break;
             case MotionEvent.ACTION_UP:
-                if(mStartRect != null){
+                if(mStartDot != null){
                     mState = STATE.ACTION_UP;
                 }else{
                     mState = STATE.RESET;
@@ -680,14 +624,12 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         }
 
         // Update score info
-        mGameState.update(mSelectedDotColor, mSelectedDots, mIsRectFormed);
+        mGameState.update(mStartDot.dotColor(), mSelectedDots, mAPathClosed);
 
         Canvas canvas = mSurfaceHolder.lockCanvas(null);
 
-        // Stores in a map the number of selected dots per column
+        // Map column number to the the number of selected dots in the column
         SparseIntArray dotsPerColumn = new SparseIntArray(mSelectedDots.size());
-
-
 
         //////////////////////////////////////
         //
@@ -695,37 +637,31 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         //
         ///////////////////////////////////////
 
-        // Redraw Rectangles
+        // Redraw Dots
         canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
-        for(List<Rectangle> rectRow: mRectangles){
-            for(Rectangle rect: rectRow){
+        for(List<Dot> dotRow: mDotRows){
+            for(Dot dot: dotRow){
                 // only draw unselected dots
-                if(!rect.isSelected()){
-                    mColorPaint.setColor(rect.dotColor().colorInfo());
-                    canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
-                }
-                else{
-                    dotsPerColumn.put(rect.column(), 1 + dotsPerColumn.get(rect.column(), 0));
+                if(!dot.isSelected()){
+                    mColorDotPaint.setColor(dot.color());
+                    canvas.drawCircle(dot.centreX(), dot.centreY(), RADIUS, mColorDotPaint);
+                }else{
+                    dotsPerColumn.put(dot.column(), 1 + dotsPerColumn.get(dot.column(), 0));
                 }
             }
         }
-
-        // Redraw Header and Footer
         drawHeaderAndFooter(canvas);
-
-        // Post new drawing
         mSurfaceHolder.unlockCanvasAndPost(canvas);
 
 
-        System.out.print("\n------------PHASE 1----------------\n");
-        printRects();
-        Log.i(TAG,"SELECTED DOTS: { " + mStartRect.dotColor().toString() + ", " + mSelectedDots.size() + " }");
+        Log.i(TAG, "\n------------PHASE 1----------------\n");
+        printDots();
+        Log.i(TAG,"SELECTED DOTS: { " + mStartDot.dotColor().toString() + ", " + mSelectedDots.size() + " }");
         try {
             Thread.sleep(TIME_DELAY*8);
         }catch (InterruptedException e){
             e.printStackTrace();
         }
-
 
 
         /////////////////////////////////////////////
@@ -741,10 +677,12 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             // Bubble "selected" dots upwards
             for(int i = 0; i < dotsPerColumn.size(); i++){
                 int column = dotsPerColumn.keyAt(i);
-                for(int row = 1; row < MAX_ROW_COUNT; row++){
+                for(int row = MAX_ROW_COUNT - 1; row > 0; row--){
                     // if the above dot is unselected and the one below in selected
-                    if( !mRectangles.get(row).get(column).isSelected() && mRectangles.get(row - 1).get(column).isSelected()){
-                        Rectangle.swap(mRectangles.get(row).get(column),  mRectangles.get(row - 1).get(column));
+                    if(mDotRows.get(row).get(column).isSelected() && !mDotRows.get(row - 1).get(column).isSelected()){
+                        Dot.swap(mDotRows.get(row).get(column),  mDotRows.get(row - 1).get(column));
+                        mDotRows.get(row).get(column).deSelect();
+                        mDotRows.get(row - 1).get(column).select();
                         done = false;
                     }
                 }
@@ -755,12 +693,12 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 canvas = mSurfaceHolder.lockCanvas(null);
                 canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
 
-                for(List<Rectangle> rectRow: mRectangles){
-                    for(Rectangle rect: rectRow){
+                for(List<Dot> dotRow: mDotRows){
+                    for(Dot dot: dotRow){
                         // only draw unselected dots
-                        if(!rect.isSelected()){
-                            mColorPaint.setColor(rect.dotColor().colorInfo());
-                            canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
+                        if(!dot.isSelected()){
+                            mColorDotPaint.setColor(dot.color());
+                            canvas.drawCircle(dot.centreX(), dot.centreY(), RADIUS, mColorDotPaint);
                         }
                     }
                 }
@@ -776,8 +714,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }
         }
 
-        System.out.print("\n------------PHASE 2 ----------------\n");
-        printRects();
+        Log.i(TAG,"\n------------PHASE 2 ----------------\n");
+        printDots();
         try {
             Thread.sleep(TIME_DELAY*2);
         }catch (InterruptedException e) {
@@ -801,26 +739,24 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 int count = dotsPerColumn.get(column, 0);
 
                 if (count > 0){
-                    int row = MAX_ROW_COUNT - 1;
+                    int row = 0;
                     // find the next selected dot
-                    while(row >= 0 && !mRectangles.get(row).get(column).isSelected()){
-                        row--;
+                    while(row < MAX_ROW_COUNT && !mDotRows.get(row).get(column).isSelected()){
+                        row++;
                     }
 
-                    if(row >= 0){
-
+                    if(row < MAX_ROW_COUNT){
                         // bubble upwards, "selected" dot found at row, "row"
-                        for(int j = row; j < MAX_COLUMN_COUNT - 1; j++){
-                            Rectangle.swap(mRectangles.get(j).get(column),  mRectangles.get(j + 1).get(column));
+                        for(int j = row; j > 0; j--){
+                            Dot.swap(mDotRows.get(j).get(column),  mDotRows.get(j - 1).get(column));
+                            mDotRows.get(j).get(column).deSelect();
                         }
-                        dotsPerColumn.put(column, count--);
+                        dotsPerColumn.put(column, --count);
 
-                        // add new dot
-                        Rectangle rect = mRectangles.get(MAX_ROW_COUNT - 1).get(column);
-                        DotNode node = getNewNode();
-                        rect.deselect();
-                        rect.setId(node.id);
-                        rect.setDotColor(DotColor.valueOf(node.degree));
+                        // Replace dotNode of "selected" dot
+                        Dot dot = mDotRows.get(0).get(column);
+                        dot.setDotNode(getNewNode());
+                        dot.deSelect();
 
                         done = false;
                     }
@@ -833,16 +769,14 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 canvas = mSurfaceHolder.lockCanvas(null);
                 canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
 
-                for(List<Rectangle> rectRow: mRectangles){
-                    for(Rectangle rect: rectRow){
-                        // only draw unselected dots
-                        if(!rect.isSelected()){
-                            mColorPaint.setColor(rect.dotColor().colorInfo());
-                            canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
+                for(List<Dot> dotRow: mDotRows){
+                    for(Dot dot: dotRow){
+                        if(!dot.isSelected()){
+                            mColorDotPaint.setColor(dot.color());
+                            canvas.drawCircle(dot.centreX(), dot.centreY(), dot.radius(), mColorDotPaint);
                         }
                     }
                 }
-                // Redraw Header and Footer
                 drawHeaderAndFooter(canvas);
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
 
@@ -855,15 +789,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
         }
 
-
-        System.out.print("\n------------PHASE 3 ----------------\n");
-        printRects();
-//        try {
-//            Thread.sleep(TIME_DELAY*200);
-//        }catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
+        Log.i(TAG, "\n------------PHASE 3 ----------------\n");
+        printDots();
         mState = STATE.RESET;
     }
 
@@ -875,18 +802,17 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         //==========================================================
         // DRAW & DECORATE DOTS
         //==========================================================
-        if(mStartRect != null && mGraphNodes != null){
-            for(List<Rectangle> list: mRectangles){
-                for(Rectangle rect: list){
-                    if(rect.id() != mStartRect.id()){
-                        if(mDataLoader.checkEdge(mStartRect.id(), rect.id(), mEdges)){
-                            canvas.drawCircle( rect.getX(),  rect.getY(), RADIUS, mColorPaint);
+        if(mStartDot != null && mStartingNodes != null){
+            for(List<Dot> list: mDotRows){
+                for(Dot dot: list){
+                    if(dot.id() != mStartDot.id()){
+                        if(mDataLoader.checkEdge(mStartDot.id(), dot.id(), mEdges)){
+                            canvas.drawCircle(dot.centreX(),  dot.centreY(), dot.radius(), mColorDotPaint);
                         }else{
-                            canvas.drawCircle( rect.getX(),  rect.getY(), RADIUS, mBlackPaint);
+                            canvas.drawCircle(dot.centreX(),  dot.centreY(), dot.radius(), mBlackDotPaint);
                         }
                     } else {
-                        canvas.drawCircle( rect.getX(),  rect.getY(), RADIUS, mColorPaint);
-                        // canvas.drawCircle( rect.getX(),  rect.getY(), RADIUS - 20, mBlackPaint);
+                        canvas.drawCircle( dot.centreX(),  dot.centreY(), dot.radius(), mColorDotPaint);
                     }
                 }
             }
@@ -902,13 +828,13 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         // draw line connections
         synchronized (mLines){
             for(Line line: mLines){
-                canvas.drawLine(line.startX, line.startY, line.endX, line.endY, mColorPathPaint);
+                canvas.drawLine(line.startX, line.startY, line.endX, line.endY, mPathPaint);
             }
         }
 
         if(mIsDrawing){
-            if (mStartRect != null && (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) ){
-                canvas.drawLine(mStartX, mStartY, mx, my, mColorPathPaint);
+            if (mStartDot != null && (dx >= TOUCH_TOLERANCE || dy >= TOUCH_TOLERANCE) ){
+                canvas.drawLine(mStartX, mStartY, mx, my, mPathPaint);
                 last_mx = mx;
                 last_my = my;
             }
@@ -934,10 +860,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
         drawHeaderAndFooter(canvas);
 
-        for(List<Rectangle> rectRow: mRectangles){
-            for(Rectangle rect: rectRow){
-                mColorPaint.setColor(rect.dotColor().colorInfo());
-                canvas.drawCircle(rect.getX(), rect.getY(), RADIUS, mColorPaint);
+        for(List<Dot> dotRow: mDotRows){
+            for(Dot dot: dotRow){
+                mColorDotPaint.setColor(dot.color());
+                canvas.drawCircle(dot.centreX(), dot.centreY(), dot.radius(), mColorDotPaint);
             }
         }
         mSurfaceHolder.unlockCanvasAndPost(canvas);
@@ -948,21 +874,21 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
         // DESELECT DOTS
         for(int i = MAX_ROW_COUNT - 1; i >= 0; i--){
-            List<Rectangle> list = mRectangles.get(i);
-            for(Rectangle rect: list){
-                rect.deselect();
+            List<Dot> list = mDotRows.get(i);
+            for(Dot dot: list){
+                dot.deSelect();
             }
         }
 
         // DEBUGGING
         Log.i(TAG, "__________________RESET_______________");
         Log.i(TAG,"SELECTED DOTS: " + mSelectedDots.size());
-        printRects();
+        printDots();
 
         mLines.clear();
-        mIsRectFormed = false;
+        mAPathClosed = false;
         mSelectedDots.clear();
-        mStartRect =  null;
+        mStartDot =  null;
         mState = STATE.DO_NOTHING;
 
         if(mGameOverListener != null){
@@ -974,114 +900,82 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     }
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    //
-    //     Draw Graph
-    //
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    private void init(){
+        int centerX = (getMeasuredWidth() - DIMENSION)/2;
+        int centerY = (getMeasuredHeight() - DIMENSION)/2;
 
+        for(int i = 0; i < MAX_ROW_COUNT; i++){
+            List<Dot> dotRow = new ArrayList<>();
+            for(int j = 0; j < MAX_COLUMN_COUNT; j++){
+                Dot dot = new Dot(centerX, centerY, RADIUS);
+                dot.setColumn(j);
+                dot.setRow(i);
+                dotRow.add(dot);
+                centerX += 2*RADIUS + HORIZONTAL_SPACING;
+            }
+            centerX = (getMeasuredWidth() - DIMENSION)/2 ;
+            centerY += 2*RADIUS + VERTICAL_SPACING;
 
-    private void setupGame(){
+            mDotRows.add(dotRow);
+        }
+
         headerRect = new Rect(0, 0, getMeasuredWidth(), HEADER_FOOTER_HEIGHT);
         footerRect = new Rect(0, getMeasuredHeight() - HEADER_FOOTER_HEIGHT, getMeasuredWidth(), getMeasuredHeight());
         scoreRect = new Rect(0, 0, SCORE_TEXT_DIM, SCORE_TEXT_DIM);
         movesRect = new Rect(getMeasuredWidth() - SCORE_TEXT_DIM, 0, getMeasuredWidth(), SCORE_TEXT_DIM);
+    }
 
+
+    private void loadGame(){
+        init();
         Canvas canvas;
-
         boolean doneDrawing = false;
+        int curEmptyRow = 0;
+        int dataIdx = 0;
+//        float endY = loadRow(currentRow);
+//        float startY = ANIM_START_POS;     // current height of the rows of dots
+//        float stepSize = (endY - startY)/2;  // change in Y
 
-        int currentRow = 5; // start with the last row
-        float endY = loadRow(currentRow);
-        float startY = ANIM_START_POS;     // current height of the rows of dots
-        float stepSize = (endY - startY)/2;  // change in Y
+        while (!doneDrawing){
+            for(int row  = curEmptyRow; row >  0; row--){
+                for(int col = 0; col < MAX_COLUMN_COUNT; col++){
+                    Dot.swap(mDotRows.get(row).get(col), mDotRows.get(row - 1).get(col));
+                }
+            }
 
-        while(!doneDrawing){
-            //==========================================
-            // TEMP DRAWING
-            //========================================
+            for(int col = 0; col < MAX_COLUMN_COUNT; col++){
+                mDotRows.get(0).get(col).setDotNode(mStartingNodes.get(dataIdx++));
+            }
+
+            if(curEmptyRow >= (MAX_ROW_COUNT - 1)){
+                doneDrawing = true;
+            }
+
+            // Update UI
             canvas = mSurfaceHolder.lockCanvas(null);
             canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
-
             drawHeaderAndFooter(canvas);
-
-            for(Circle circle: mCircles){
-                mColorPaint.setColor(circle.color());
-                canvas.drawCircle(circle.centreX(), circle.centreY(), RADIUS, mColorPaint);
-            }
-            for(Circle circle: mBufferCircles){
-                mColorPaint.setColor(circle.color());
-                canvas.drawCircle(circle.centreX(), startY, RADIUS, mColorPaint);
+            for(int row  = curEmptyRow; row >=  0; row--){
+                for(int col = 0; col < MAX_COLUMN_COUNT; col++){
+                    Dot dot = mDotRows.get(row).get(col);
+                    mColorDotPaint.setColor(dot.color());
+                    canvas.drawCircle(dot.centreX(), dot.centreY(), dot.radius(), mColorDotPaint);
+                }
             }
             mSurfaceHolder.unlockCanvasAndPost(canvas);
+
             try {
-                Thread.sleep(TIME_DELAY * 2);
+                Thread.sleep(TIME_DELAY*4);
             }catch (InterruptedException e){
                 e.printStackTrace();
             }
-            /////////////////////////////////////////
 
-
-            startY += stepSize;
-            if(startY >= endY){
-                startY = endY;
-
-                canvas = mSurfaceHolder.lockCanvas(null);
-                canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
-                drawHeaderAndFooter(canvas);
-                mCircles.addAll(mBufferCircles);
-                for(Circle circle: mCircles){
-                    mColorPaint.setColor(circle.color());
-                    canvas.drawCircle(circle.centreX(), circle.centreY(), RADIUS, mColorPaint);
-                }
-                mSurfaceHolder.unlockCanvasAndPost(canvas);
-
-
-                try {
-                    Thread.sleep(TIME_DELAY * 8);
-                }catch (InterruptedException e){
-                    e.printStackTrace();
-                }
-
-                if(--currentRow > -1){
-                    startY = ANIM_START_POS;
-                    endY = loadRow(currentRow);
-                    stepSize = (endY - startY)/2;
-                }else{
-                    doneDrawing = true;
-                    mInitialized = true;
-                }
-            }
+            curEmptyRow++;
         }
+
+        mReady = true;
     }
 
-    private int loadRow(int row){
-        List<Rectangle> newRow = new ArrayList<>();
-        int x = (getMeasuredWidth() - DIMENSION)/2 ;
-        int y = (getMeasuredHeight() - DIMENSION)/2 + row*(2* RADIUS + VERTICAL_SPACING);
-        mBufferCircles = new ArrayList<>();
-        for (int i = row*MAX_COLUMN_COUNT, count = i+MAX_COLUMN_COUNT, col =0; i < count ; i++, col++) {
-
-            DotNode node = mGraphNodes.get(i);
-
-            mBufferCircles.add(new Circle(x,y, RADIUS,node.id, DotColor.colorInfo(node.degree)));
-
-            // Define new Rectangle
-            newRow.add( new Rectangle(
-                            x - RADIUS - RECT_TOLERANCE,
-                            y - RADIUS - RECT_TOLERANCE ,
-                            x + RADIUS + RECT_TOLERANCE,
-                            y + RADIUS + RECT_TOLERANCE,
-                               node,  row, col
-                    ));
-            newRow.get(newRow.size() - 1).setAnimStartY(ANIM_START_POS);
-
-            // increase column
-            x += 2* RADIUS + HORIZONTAL_SPACING;
-        }
-        mRectangles.push(newRow);
-        return y;
-    }
 
     private DotNode getNewNode(){
         DotNode node = null;
@@ -1140,8 +1034,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         // draw objective dots
         if(objective != null){
             for(DotColor dotColor: objective.keySet()){
-                mColorPaint.setColor(dotColor.colorInfo());
-                canvas.drawCircle(startX, startY, RADIUS_SMALL, mColorPaint);
+                mColorDotPaint.setColor(dotColor.colorInfo());
+                canvas.drawCircle(startX, startY, RADIUS_SMALL, mColorDotPaint);
 
                 if(!mGameState.isCollected(dotColor)){
                     String string = score.get(dotColor)[State.IDX_DOTS_COLLECTED] + " / " + score.get(dotColor)[State.IDX_DOTS_GOAL] ;
@@ -1151,10 +1045,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                     float posY = startY + RADIUS_SMALL*0.4f;
                     float x = RADIUS_SMALL*(float)Math.cos(Math.PI/3);
                     float y = RADIUS_SMALL*(float)Math.sin(Math.PI/3);
-                    canvas.drawLine(startX, posY, startX + x - 5, posY  - y, mWhitePathPaint);
+                    canvas.drawLine(startX, posY, startX + x - 5, posY  - y, mTickMarkPaint);
                     x = .5f*RADIUS_SMALL*(float)Math.cos(Math.PI/6);
                     y = .5f*RADIUS_SMALL*(float)Math.sin(Math.PI/6);
-                    canvas.drawLine(startX, posY, startX - x, posY  - y, mWhitePathPaint);
+                    canvas.drawLine(startX, posY, startX - x, posY  - y, mTickMarkPaint);
                 }
                 startX += RADIUS_SMALL *2 + HEADER_DOTS_SPACING;
             }
@@ -1201,79 +1095,58 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
         // Draw Ability #1
         // Swap red dot.
-        mColorPaint.setColor(Color.parseColor("#FF4081"));
-        canvas.drawCircle(posX, posY, radius, mColorPaint);
-        canvas.drawLine(posX - .6f*radius, posY, posX + .6f*radius, posY, mWhitePathPaint);
-        canvas.drawLine(posX , posY- .6f*radius, posX , posY+ .6f*radius, mWhitePathPaint);
+        mColorDotPaint.setColor(Color.parseColor("#FF4081"));
+        canvas.drawCircle(posX, posY, radius, mColorDotPaint);
+        canvas.drawLine(posX - .6f*radius, posY, posX + .6f*radius, posY, mTickMarkPaint);
+        canvas.drawLine(posX , posY- .6f*radius, posX , posY+ .6f*radius, mTickMarkPaint);
 
         // Draw Ability #2
         // Add additional number of moves
         posX += spacing + 2*radius;
-        mColorPaint.setColor(Color.parseColor("#ffb6e9b5"));
-        canvas.drawCircle(posX, posY, radius, mColorPaint);
-        canvas.drawLine(posX, posY, posX, posY - radius*.7f, mWhitePathPaint);
+        mColorDotPaint.setColor(Color.parseColor("#ffb6e9b5"));
+        canvas.drawCircle(posX, posY, radius, mColorDotPaint);
+        canvas.drawLine(posX, posY, posX, posY - radius*.7f, mTickMarkPaint);
         float offsetX = .75f*radius*(float)Math.cos(Math.PI/4);
         float offsetY = .75f*radius*(float)Math.sin(Math.PI/4);
-        canvas.drawLine(posX, posY, posX + offsetX, posY + offsetY, mWhitePathPaint);
+        canvas.drawLine(posX, posY, posX + offsetX, posY + offsetY, mTickMarkPaint);
 
         // Draw Ability #3
         posX += spacing + 2*radius;
-        mColorPaint.setColor(Color.LTGRAY);
-        canvas.drawCircle(posX, posY, radius, mColorPaint);
+        mColorDotPaint.setColor(Color.LTGRAY);
+        canvas.drawCircle(posX, posY, radius, mColorDotPaint);
 
 
-        if(mStartRect != null){
-            mColorPaint.setColor(mStartRect.dotColor().colorInfo());
+        if(mStartDot != null){
+            mColorDotPaint.setColor(mStartDot.dotColor().colorInfo());
         }
     }
 
 
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    //
-    //     Debugging
-    //
-    ////////////////////////////////////////////////////////////////////////////////////////////////
+    public void setGameLevel(int id){
+        if(mGameLevel == null){
 
-    private void printRects(){
-        System.out.print("\n---------------------------------------\n");
-        for(int i = MAX_ROW_COUNT - 1; i >= 0; i--){
-            List<Rectangle> list = mRectangles.get(i);
-            for(Rectangle rect: list){
-                if(rect.isSelected()) {
-                    System.out.print(colorToString(rect.dotColor().colorInfo()) + "* ");
-                }else{
-                    System.out.print(colorToString(rect.dotColor().colorInfo()) + "  ");
+            LevelDatabaseHelper helper = null;
+
+            try {
+                helper = LevelDatabaseHelper.getInstance(getContext());
+            } catch (Exception e) {
+                throw new Error("Unable to create database");
+            }
+            finally {
+                try {
+                    if(helper != null){
+                        mGameLevel = helper.getLevel(id);
+                        mGameState = new State(mGameLevel);
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
                 }
             }
-            System.out.print("\n");
+
         }
-        System.out.print("\n--------------------------------------\n");
+
     }
 
-    private String colorToString(int color){
-        if (color == getContext().getColor(R.color.dot_violet))
-            return "PUR";
-        else if (color == getContext().getColor(R.color.dot_indigo))
-            return "IND";
-        else if (color == getContext().getColor(R.color.dot_blue))
-            return "BLU";
-        else if (color == getContext().getColor(R.color.dot_green))
-            return "GRE";
-        else if (color == getContext().getColor(R.color.dot_yellow))
-            return "YEL";
-        else if (color == getContext().getColor(R.color.dot_orange))
-            return "ORA";
-        else if (color == getContext().getColor(R.color.dot_red))
-            return "RED";
-
-        return "UNK";
-    }
-
-    ////////////////////////////////////////////////////////////////////////////////////////////////
-    //
-    //     Other Methods
-    //
-    ////////////////////////////////////////////////////////////////////////////////////////////////
 
     public void resume(){
         if(!mRunning){
@@ -1315,29 +1188,46 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     }
 
 
-    public void setGameLevel(int id){
-        if(mGameLevel == null){
+    ////////////////////////////////////////////////////////////////////////////////////////////////
+    //
+    //     Debugging
+    //
+    ////////////////////////////////////////////////////////////////////////////////////////////////
 
-            LevelDatabaseHelper helper = null;
-
-            try {
-                helper = LevelDatabaseHelper.getInstance(getContext());
-            } catch (Exception e) {
-                throw new Error("Unable to create database");
-            }
-            finally {
-                try {
-                    if(helper != null){
-                        mGameLevel = helper.getLevel(id);
-                        mGameState = new State(mGameLevel);
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
+    private void printDots(){
+        Log.i(TAG, "---------------------------------------");
+        for(List<Dot> dotRow: mDotRows){
+            StringBuilder s = new StringBuilder();
+            for(Dot dot: dotRow){
+                s.append(colorToString(dot.dotColor().colorInfo()));
+                if(dot.isSelected()) {
+                    s.append("* ");
+                }else{
+                   s.append("  ");
                 }
             }
-
+           Log.i(TAG, s.toString());
         }
+        Log.i(TAG, "--------------------------------------");
+    }
 
+    private String colorToString(int color){
+        if (color == getContext().getColor(R.color.dot_violet))
+            return "PUR";
+        else if (color == getContext().getColor(R.color.dot_indigo))
+            return "IND";
+        else if (color == getContext().getColor(R.color.dot_blue))
+            return "BLU";
+        else if (color == getContext().getColor(R.color.dot_green))
+            return "GRE";
+        else if (color == getContext().getColor(R.color.dot_yellow))
+            return "YEL";
+        else if (color == getContext().getColor(R.color.dot_orange))
+            return "ORA";
+        else if (color == getContext().getColor(R.color.dot_red))
+            return "RED";
+
+        return "UNK";
     }
 
 
@@ -1390,7 +1280,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }catch (InterruptedException e){
                 e.printStackTrace();
             }
-            System.out.println("I'm just waiting.");
+            Log.i(TAG, "Surface Not Ready.");
         }
         Log.i(TAG, "#2.  SURFACE READY");
         if(!mDoneLoadingData){
@@ -1403,23 +1293,22 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }catch (InterruptedException e){
                 e.printStackTrace();
             }
-
+            Log.i(TAG, "Waiting for Data to Load.");
         }
         Log.i(TAG, "#3.  DONE LOADING DATA");
 
-        if(!mInitialized){
-            setupGame();
+        if(!mReady){
+            loadGame();
         }
 
-        while(!mInitialized){
+        while(!mReady){
             try{
                 Thread.sleep(10);
             }catch (InterruptedException e){
                 e.printStackTrace();
             }
-            System.out.println("I'm just waiting in mInitializer.");
+            Log.i(TAG, "Game not ready.");
         }
-        mReady = true;
 
         Log.i(TAG, "GAME READY");
         //================================
@@ -1458,7 +1347,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     @Override
     public void onLoad(ArrayList<DotNode> nodes) {
-        mGraphNodes = nodes;
+        mStartingNodes = nodes;
         mDoneLoadingData = true;
     }
 
