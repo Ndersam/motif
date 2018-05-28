@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.DialogFragment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.LayoutInflater;
@@ -91,32 +92,14 @@ public class GameOverMenu extends DialogFragment {
             Button btnRetry = contentView.findViewById(R.id.levelfailed_retry);
 
 
-            btnExit.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    Intent intent = new Intent(getActivity(), LevelSelectActivity.class);
-                    startActivity(intent);
-                    getActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                    getActivity().finish();
-                }
+            btnExit.setOnClickListener(view ->  {
+                Intent intent = new Intent(getActivity(), LevelSelectActivity.class);
+                startActivity(intent);
+                getActivity().overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                getActivity().finish();
             });
 
-
-            btnRetry.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    FragmentManager manager = getActivity().getSupportFragmentManager();
-                    FragmentTransaction transaction = manager.beginTransaction();
-
-                    GameFragment.quitInstance();
-
-                    GameFragment gameFragment = GameFragment.getInstance();
-                    gameFragment.setGameID(mLevelId);
-
-                    transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
-                    transaction.replace(R.id.game_content_frame, gameFragment).commit();
-                }
-            });
+            btnRetry.setOnClickListener( view ->  GameFragment.getInstance().restart());
         }
 
 
