@@ -3,9 +3,13 @@ package com.nders.motif.data;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.database.SQLException;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.nders.motif.Constants;
 
 import java.io.IOException;
 
@@ -28,6 +32,7 @@ public class DataInitService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
+        Log.i(TAG, "Attempting to open database....");
         MotifDatabaseHelper motifDatabaseHelper = null;
         long startTime = System.currentTimeMillis();
         try {
@@ -41,8 +46,10 @@ public class DataInitService extends IntentService {
                 if(motifDatabaseHelper != null){
                     motifDatabaseHelper.openDataBase();
                     motifDatabaseHelper.close();
-                    Log.i("SERVICE UPDATE", "Data init");
-                    Log.i(TAG, "Time: " + (System.currentTimeMillis() - startTime)/1000);
+                    Log.i(TAG, "Data Check Complete. ( " + (System.currentTimeMillis() - startTime)/1000 + "s )");
+
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+                    pref.edit().putBoolean(Constants.KEY_DATA_CHECK_COMPLETE, true).apply();
                 }
             } catch (SQLException e) {
                 e.printStackTrace();

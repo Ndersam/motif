@@ -28,11 +28,6 @@ public class GameActivity extends AppCompatActivity {
 
         int gameID = getIntent().getIntExtra(Constants.KEY_GAME_ID, -1);
 
-        // Sounds
-
-        //mSoundHelper.prepareMusicPlayer(getApplicationContext());
-
-
         mGameFragment = GameFragment.getInstance();
         mGameFragment.setGameID(gameID);
         mGameFragment.setRetainInstance(true);

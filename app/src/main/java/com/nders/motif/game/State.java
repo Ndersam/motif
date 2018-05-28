@@ -144,7 +144,7 @@ public class State {
      * no moves are left
      */
     public boolean failed(){
-        return !allDotsCollected() && (mMovesLeft < 0);
+        return !allDotsCollected() && (mMovesLeft <= 0);
     }
 
     /**

@@ -22,7 +22,7 @@
         android:layout_width="250dp"
         android:layout_height="180dp"
         android:orientation="vertical"
-        android:background="@drawable/white_rounded_rect">
+        android:background="@drawable/round_rect_white">
 
         <TextView
             android:id="@+id/level_title"

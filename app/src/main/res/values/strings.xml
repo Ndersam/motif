@@ -31,4 +31,7 @@
     <string name="about_playstore_remark">Rate on Play Store</string>
     <string name="about_github_remark">Visit Github page</string>
     <string name="about_copyright">Copyright \u00A9 2018 City University of Hong Kong.</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

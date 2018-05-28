@@ -18,12 +18,11 @@ public class DotNode {
     }
 
     public static Comparator<DotNode> idComparator() {
-        Comparator<DotNode> comp = new Comparator<DotNode>() {
-            @Override
-            public int compare(DotNode a, DotNode b) {
-                return a.id - b.id;
-            }
-        };
-        return comp;
+        return Comparator.comparingInt(d -> d.id);
+    }
+
+    @Override
+    public String toString() {
+        return String.valueOf(id);
     }
 }

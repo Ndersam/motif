@@ -41,7 +41,6 @@ import java.util.Stack;
 
 public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Callback, Loader.LoaderListener{
 
-    // for logging debug information
     private static final String TAG = GameView.class.getSimpleName();
 
 
@@ -77,13 +76,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // The height setting of the header and the footer.
     protected static final int HEADER_FOOTER_HEIGHT = 250;
 
-    // Padding used in "padding" the contents of the header and the footer.
-    protected static final float VERTICAL_PADDING = 16;
-
     protected static final int SCORE_TEXT_DIM = 300;
 
 
-    protected static int LINE_THRESHOLD;
 
 
     /**
@@ -141,21 +136,12 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // Keeps track of the stationary dots drawn on screen.
     protected List<List<Dot>> mDotRows = new ArrayList<>();
 
-    // Temporary variables for initializing the game
-    protected List<Circle> mCircles = new ArrayList<>();
-
-
     // Keeps track of all the lines drawn
     protected Stack<Line> mLines = new Stack<>();
 
-    // Stores the first selected dot
+    // The first selected dot
     protected Dot mStartDot = null;
 
-
-    // Stores all the dots that have been connected
-    // The contents of this container get swapped with other dots ...
-    // ... that appear above them and have not been selected (connected).
-    // This occurs if and only if the size of the container is greater than one.
     protected Stack<Dot> mSelectedDots = new Stack<>();
 
 
@@ -209,9 +195,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     // Is true when the associated activity starts or resumes.
     protected boolean  mSurfaceReady = false;
 
-    // Is true when the game starts and all the initial set of dots have been drawn.
-    protected boolean mInitialized = false;
-
     // Is true when the associated activity is not paused and is in focus.
     protected volatile boolean mRunning = false;
 
@@ -231,11 +214,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     // Object holding the details of the current game level.
     protected Level mGameLevel = null;
-
-    // Keeps track of frequencies of the "dotColors" loaded.
-    // This is used for ensuring the an optimum number of particular colors are present.
-    // This varies with the game level.
-    protected EnumMap<DotColor, Integer> mDotColorCounter = new EnumMap<>(DotColor.class);
 
     protected boolean mIsDrawing = false;
 
@@ -268,7 +246,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     /**
      * Constructor is private to prevent direct instantiation.
      * Make a call to the static method "getInstance" instead.
-     * @param context
      */
     private GameView(Context context) {
         this(context, null);
@@ -277,8 +254,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     /**
      * Constructor is private to prevent direct instantiation.
      * Make a call to the static method "getInstance" instead.
-     * @param context
-     * @param attrs
      */
     private GameView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -386,7 +361,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     @Override
     public boolean onTouchEvent(@NonNull MotionEvent event) {
         // hack to cancel multitouch events
-        if(event.getPointerCount() > 1) return false;
+        if(event.getPointerCount() > 1){
+            mState = STATE.RESET;
+            return super.onTouchEvent(event);
+        }
         if(!mReady) return false;
 
         // Retrieve the point
@@ -840,10 +818,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             }
         }
 
-
         drawHeaderAndFooter(canvas);
 
-        // display
         mSurfaceHolder.unlockCanvasAndPost(canvas);
     }
 

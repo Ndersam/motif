@@ -70,23 +70,6 @@ public class GameFragment extends Fragment implements GameView.GameOverListener{
     }
 
 
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-    }
-
     @Override
     public void onResume() {
         GameView.getInstance(getContext()).resume();
@@ -96,7 +79,6 @@ public class GameFragment extends Fragment implements GameView.GameOverListener{
     @Override
     public void onPause() {
         super.onPause();
-        //mSoundHelper.pauseMusic();
         if(GameView.getInstance(getContext()) != null)
             GameView.getInstance(getContext()).pause();
         super.onPause();

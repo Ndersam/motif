@@ -21,22 +21,7 @@ public class SplashActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         //setContentView(R.layout.activity_splash);
-
         init();
-
-        TimerTask splashTask = new TimerTask() {
-            @Override
-            public void run() {
-                Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
-                startActivity(intent);
-                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-                finish();
-            }
-        };
-        Timer opening = new Timer();
-        opening.schedule(splashTask,1);
-
-
     }
 
     public void init(){
@@ -59,7 +44,24 @@ public class SplashActivity extends AppCompatActivity {
 
 
         // TODO : [2]  27/02/2018 Check Other settings
-        // if game is starting for the first time
+        //
+        final Intent i;
+        if(pref.getBoolean(Constants.KEY_FIRST_LAUNCH, true)){
+            i = new Intent(SplashActivity.this, TutorialActivity.class);
+        }else{
+            i = new Intent(SplashActivity.this, HomeActivity.class);
+        }
+
+        TimerTask splashTask = new TimerTask() {
+            @Override
+            public void run() {
+                startActivity(i);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+                finish();
+            }
+        };
+        Timer opening = new Timer();
+        opening.schedule(splashTask,1);
     }
 
 }
