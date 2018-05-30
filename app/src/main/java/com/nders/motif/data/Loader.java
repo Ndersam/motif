@@ -7,13 +7,16 @@ import android.database.SQLException;
 import android.os.AsyncTask;
 import android.preference.PreferenceManager;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 
 import com.nders.motif.Constants;
 import com.nders.motif.entities.DotNode;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Created by nders on 2/5/2018.
@@ -74,10 +77,6 @@ public class Loader{
         new NodesLoaderTask().execute();
     }
 
-    public void loadHandPicked(String[] ids){
-        disableLoadAll();
-        new NodesLoaderTask().execute(ids);
-    }
 
     public void disableLoadAll(){
         mLoadAll = false;
@@ -166,7 +165,11 @@ public class Loader{
         @Override
         protected void onProgressUpdate(ArrayList<DotNode>... values) {
             super.onProgressUpdate(values);
-            if(mLoaderListener != null) mLoaderListener.onLoad(new ArrayList<DotNode>(values[0]));
+            if(mLoaderListener != null) {
+                ArrayList<DotNode> list = new ArrayList<>(values[0]);
+                Collections.shuffle(list);
+                mLoaderListener.onLoad(list);
+            }
         }
 
         @Override

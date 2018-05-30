@@ -1,5 +1,9 @@
 package com.nders.motif;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
+import android.animation.AnimatorSet;
+import android.animation.ObjectAnimator;
 import android.app.Dialog;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,6 +32,9 @@ public class GameOverMenu extends DialogFragment {
     private int mLevelId = 0;
     private int mLevelScore = 0;
     private boolean mLevelComplete = false;
+
+    private AnimatorSet mButtonSetAnimator = null;
+    private boolean stopAnimation = false;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -79,6 +86,7 @@ public class GameOverMenu extends DialogFragment {
                 }
             });
             btnContinue.setEnabled(false);
+            setupButtonAnimation(btnContinue);
 
             TextView txtScore = contentView.findViewById(R.id.gameover_score);
             //txtScore.setText(String.valueOf(mLevelScore));
@@ -142,10 +150,61 @@ public class GameOverMenu extends DialogFragment {
                     @Override
                     public void run() {
                         btnContinue.setEnabled(true);
+                        mButtonSetAnimator.start();
                     }
                 });
             }
         }).start();
     }
 
+    private void setupButtonAnimation(Button button){
+        mButtonSetAnimator = new AnimatorSet();
+        AnimatorSet set1 = new AnimatorSet();
+        AnimatorSet set2 = new AnimatorSet();
+
+
+        float a = 1.0f;
+        float b = 1.1f;
+        int duration = 1000;
+
+        set1.playTogether(
+                ObjectAnimator.ofFloat(button, "scaleX", a, b)
+                        .setDuration(duration),
+                ObjectAnimator.ofFloat(button, "scaleY", a, b)
+                        .setDuration(duration)
+        );
+        set2.playTogether(
+                ObjectAnimator.ofFloat(button, "scaleX", b, a)
+                        .setDuration(duration),
+                ObjectAnimator.ofFloat(button, "scaleY", b, a)
+                        .setDuration(duration)
+        );
+
+        mButtonSetAnimator.playSequentially(set1, set2);
+
+
+        mButtonSetAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                super.onAnimationEnd(animation);
+                try{
+                    if(!stopAnimation){
+                        mButtonSetAnimator.start();
+                    }
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
+
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopAnimation = true;
+        if(mButtonSetAnimator != null){
+            mButtonSetAnimator.end();
+        }
+    }
 }

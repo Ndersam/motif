@@ -61,7 +61,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     static final float TEXT_SIZE_MEDIUM = 60;
     static final float STROKE_WIDTH = 40;
     static final float TOUCH_TOLERANCE = 2;
-    static final float DOT_TOLERANCE = 4;
+    static final float DOT_TOLERANCE = 35;
 
     static final int BACKGROUND_COLOR = Color.WHITE;
     static final int TEXT_COLOR = Color.parseColor("#202020");
@@ -332,7 +332,12 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
 
     private void onActionDown(){
         if(t.milestone() == Tutorial.MILESTONE.COLOR_CHECK ){
-            t.milestoneReached(mStartDot.dotColor(), mSelectedDots.size(), mStartDot.id());
+            if(t.milestoneReached(mStartDot.dotColor(), mSelectedDots.size(), mStartDot.id())){
+                draw();
+                Canvas canvas = mSurfaceHolder.lockCanvas(null);
+                displayFeedback(canvas);
+                mSurfaceHolder.unlockCanvasAndPost(canvas);
+            }
         }
     }
 
@@ -441,7 +446,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
             draw();
 
             try {
-                Thread.sleep(TIME_DELAY*5);
+                Thread.sleep(TIME_DELAY*6);
             }catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -560,10 +565,11 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     private void displayFeedback(Canvas canvas){
+        int x = getWidth()/2, y = getHeight()/3;
         List<String> feedback = Arrays.asList("Brilliant!", "Nice!", "Excellent!");
         Collections.shuffle(feedback);
 
-        canvas.drawText(feedback.get(0), getWidth()/2, getHeight()/3, mTextPaint);
+        canvas.drawText(feedback.get(0), x, y, mTextPaint);
     }
 
     private void loadTutorial(Tutorial t){

@@ -49,10 +49,10 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
      */
 
     // Horizontal spacing between dots
-    private static final int HORIZONTAL_SPACING = 100;
+    private static final int HORIZONTAL_SPACING = 80;
 
     // Vertical spacing between dots
-    private static final int VERTICAL_SPACING = 100;
+    private static final int VERTICAL_SPACING = 80;
 
     // The number of dots in a row.
     private static final int MAX_ROW_COUNT = 6;
@@ -62,7 +62,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     // Height and width of the area allocated for playing the dots.
     // This area is centered within the view.
-    private static final int DIMENSION = 1000;
+    private static int DIMENSION;
+
+    protected static final float DOT_TOLERANCE = 35;
 
     // Radius of main dots - dots centred in the view.
     protected static final int RADIUS = 50;
@@ -123,7 +125,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     protected static final float TEXT_SIZE_MEDIUM = 45;
     protected static final float TEXT_SIZE_LARGE = 150;
     protected static final float TEXT_SIZE_SMALL = 40;
-    protected static final float TEXT_PADDING = 100;
+
 
     protected static final float TOUCH_STROKE_WIDTH = 40;
     protected static final float TOUCH_TOLERANCE = 2;
@@ -877,8 +879,9 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
 
     private void init(){
-        int centerX = (getMeasuredWidth() - DIMENSION)/2;
-        int centerY = (getMeasuredHeight() - DIMENSION)/2;
+        DIMENSION = (2*RADIUS*MAX_COLUMN_COUNT) + HORIZONTAL_SPACING*(MAX_COLUMN_COUNT - 1);
+        int centerX = (getMeasuredWidth() - DIMENSION)/2 + RADIUS;
+        int centerY = (getMeasuredHeight() - DIMENSION)/2 + RADIUS;
 
         for(int i = 0; i < MAX_ROW_COUNT; i++){
             List<Dot> dotRow = new ArrayList<>();
@@ -886,10 +889,11 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
                 Dot dot = new Dot(centerX, centerY, RADIUS);
                 dot.setColumn(j);
                 dot.setRow(i);
+                dot.setTolerance(DOT_TOLERANCE);
                 dotRow.add(dot);
                 centerX += 2*RADIUS + HORIZONTAL_SPACING;
             }
-            centerX = (getMeasuredWidth() - DIMENSION)/2 ;
+            centerX = (getMeasuredWidth() - DIMENSION)/2 + RADIUS;
             centerY += 2*RADIUS + VERTICAL_SPACING;
 
             mDotRows.add(dotRow);

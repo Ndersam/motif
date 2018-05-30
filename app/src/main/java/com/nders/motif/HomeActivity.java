@@ -10,10 +10,6 @@ import android.widget.Button;
 
 public class HomeActivity extends AppCompatActivity {
 
-
-
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -25,40 +21,34 @@ public class HomeActivity extends AppCompatActivity {
 
         Button btnPlay = findViewById(R.id.btn_play);
         Button btnOptions = findViewById(R.id.btn_options);
-        Button btnAbout = findViewById(R.id.btn_about);
+//        Button btnAbout = findViewById(R.id.btn_about);
 
-        btnPlay.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        btnPlay.setOnClickListener( view ->{
                 SoundHelper.getInstance(HomeActivity.this).playButtonClick();
                 Intent intent  = new Intent(HomeActivity.this, LevelSelectActivity.class);
                 startActivity(intent);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
                 finish();
-            }
         });
 
-        btnOptions.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
+        btnOptions.setOnClickListener( view -> {
                 SoundHelper.getInstance(HomeActivity.this).playButtonClick();
                 Intent intent = new Intent(HomeActivity.this, AboutAndOptionsActivity.class);
                 intent.putExtra(Constants.KEY_ABOUT_OR_OPTIONS, Constants.VALUE_OPTIONS);
                 startActivity(intent);
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-            }
         });
 
-        btnAbout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                SoundHelper.getInstance(HomeActivity.this).playButtonClick();
-                Intent intent = new Intent(HomeActivity.this, AboutAndOptionsActivity.class);
-                intent.putExtra(Constants.KEY_ABOUT_OR_OPTIONS, Constants.VALUE_ABOUT);
-                startActivity(intent);
-                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-            }
-        });
+//        btnAbout.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                SoundHelper.getInstance(HomeActivity.this).playButtonClick();
+//                Intent intent = new Intent(HomeActivity.this, AboutAndOptionsActivity.class);
+//                intent.putExtra(Constants.KEY_ABOUT_OR_OPTIONS, Constants.VALUE_ABOUT);
+//                startActivity(intent);
+//                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+//            }
+//        });
     }
 
     @Override

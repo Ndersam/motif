@@ -14,14 +14,15 @@ public class State {
     private int mMovesLeft;
 
     private static int RED_DOT_LIMIT = 8;
-    private static final int BAD_DOT_LIMIT = 10;
-    private static final int GOOD_NON_ROY_LIMIT = 16;
+    private static final int BAD_DOT_LIMIT = 16;
+    private static final int GOOD_NON_ROY_LIMIT = 20;
+    private static final int GOOD_ROY_LIMIT = 36 - BAD_DOT_LIMIT;
 
     // 'Weird' names
 
     // A dot is good if it is one of the dots that are to be collected.
     // That is, if the dot color exist in the level objective map.
-    private int mGoodDotCount;
+    private int mGoodROYDots;
 
     // This is a dot that is 'good' and not one of { RED, ORANGE, YELLOW } dots
     private int mGoodNonROYDots;
@@ -45,7 +46,7 @@ public class State {
         for(DotColor key: mLevel.getObjective().keySet()){
             mProgressCounter.put(key, new int[]{mLevel.getObjective().get(key), 0});
             if(isROYDot(key)){
-                mGoodDotCount++;
+                mGoodROYDots++;
             }else{
                 mGoodNonROYDots++;
             }
@@ -53,9 +54,10 @@ public class State {
         mMovesLeft = mLevel.moves();
         mScore = 0;
 
-        if(mGoodNonROYDots >= mGoodDotCount*.75f){
+        if(mGoodNonROYDots >= mGoodROYDots *.75f){
             RED_DOT_LIMIT = 19;
         }
+        mGoodROYDots = mGoodNonROYDots = 0;
     }
 
 
@@ -78,6 +80,8 @@ public class State {
             if(mProgressCounter.containsKey(dot.dotColor())){
                 if(!isROYDot(dot.dotColor())){
                     mGoodNonROYDots--;
+                }else{
+                    mGoodROYDots--;
                 }
             }else {
                 if(dot.dotColor() == DotColor.RED){
@@ -118,6 +122,12 @@ public class State {
                 if(mGoodNonROYDots < GOOD_NON_ROY_LIMIT){
                     mGoodNonROYDots++;
                 }else {
+                    isValid = false;
+                }
+            }else{
+                if(mGoodROYDots < GOOD_ROY_LIMIT){
+                    mGoodROYDots++;
+                }else{
                     isValid = false;
                 }
             }

@@ -52,8 +52,8 @@ public class Tutorial {
 
         Tutorial t2 = new Tutorial();
         t2.mMilestones.add(MILESTONE.DOT_COUNT);
-        t2.mDotCounts.add(4);
-        t2.mInstructions.add("Connect all dots by\ndrawing a rectangle");
+        t2.mDotCounts.add(3);
+        t2.mInstructions.add("Can you connect 3 dots?");
         t2.mEdges = sAllEdges.get(1);
         t2.mDotNodes = sAllNodes.get(1);
         tutorials.add(t2);

@@ -87,7 +87,7 @@ public class SettingsFragment extends Fragment {
         // VIBRATION
         //
         ////////////////////////////
-        vibrationControl.setChecked(pref.getBoolean(Constants.KEY_VIBRATION_ENABLED, false));
+        vibrationControl.setChecked(pref.getBoolean(Constants.KEY_VIBRATION_ENABLED, true));
         vibrationControl.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
