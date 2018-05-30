@@ -22,7 +22,6 @@ import com.nders.motif.R;
 import com.nders.motif.SoundHelper;
 import com.nders.motif.Utils;
 import com.nders.motif.data.LevelDatabaseHelper;
-import com.nders.motif.entities.Circle;
 import com.nders.motif.entities.Dot;
 import com.nders.motif.entities.DotColor;
 import com.nders.motif.entities.DotNode;
@@ -224,6 +223,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     protected boolean mAPathClosed = false;
 
+    protected boolean mObjectiveShown = false;
+
     /**
      **   MISC
      */
@@ -232,7 +233,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     protected SurfaceHolder mSurfaceHolder;
 
     // Callback interface for handling "game complete" and "game over" events.
-    protected GameOverListener mGameOverListener = null;
+    protected GameListener mGameListener = null;
 
     // Static reference to the GameView to prevent the recreation of multiple instances.
     private static GameView sInstance;
@@ -869,14 +870,46 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         mStartDot =  null;
         mState = STATE.DO_NOTHING;
 
-        if(mGameOverListener != null){
-            if(mGameState.succeeded() || mGameState.failed()){
-                mGameOverListener.gameOver(mGameState);
+        if(mGameListener != null){
+            boolean isOver = false;
+            if(mGameState.succeeded()){
+                isOver = true;
+            } else if(mGameState.failed()){
+                isOver = true;
+            }
+
+            sleep(8);
+
+            if (isOver){
+                mGameListener.gameOver(mGameState);
             }
         }
 
     }
 
+    private void sleep(int millis){
+        try{
+            Thread.sleep(TIME_DELAY*millis);
+        }catch (InterruptedException e){
+            e.printStackTrace();
+        }
+    }
+
+    private void preinit(){
+        if(mGameListener != null){
+            if(!mObjectiveShown){
+                init();
+
+                Canvas canvas;
+                canvas = mSurfaceHolder.lockCanvas();
+                canvas.drawColor(Color.parseColor("#F5F5F5"));
+                drawHeaderAndFooter(canvas);
+                mSurfaceHolder.unlockCanvasAndPost(canvas);
+                mGameListener.displayObjective();
+                mObjectiveShown = true;
+            }
+        }
+    }
 
     private void init(){
         DIMENSION = (2*RADIUS*MAX_COLUMN_COUNT) + HORIZONTAL_SPACING*(MAX_COLUMN_COUNT - 1);
@@ -907,7 +940,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
 
     private void loadGame(){
-        init();
         Canvas canvas;
         boolean doneDrawing = false;
         int curEmptyRow = 0;
@@ -1216,12 +1248,14 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     //     Interfaces
     //
     ////////////////////////////////////////////////////////////////////////////////////////////////
-    public interface GameOverListener{
+    public interface GameListener {
         void gameOver(State state);
+        void displayObjective();
+        boolean isObjectiveVisible();
     }
 
-    public void setGameOverListener(GameOverListener listener){
-        mGameOverListener = listener;
+    public void setGameOverListener(GameListener listener){
+        mGameListener = listener;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1263,6 +1297,14 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
             Log.i(TAG, "Surface Not Ready.");
         }
         Log.i(TAG, "#2.  SURFACE READY");
+
+        // display objective if necessary
+        if(!mObjectiveShown){
+            preinit();
+            return;
+        }
+
+
         if(!mDoneLoadingData){
             mDataLoader.setGraphNumber(mGameLevel.id());
             mDataLoader.loadNodes();

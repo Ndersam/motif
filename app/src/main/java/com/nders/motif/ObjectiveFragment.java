@@ -32,6 +32,7 @@ public class ObjectiveFragment extends DialogFragment {
 
 
     private int mLevelId;
+    private boolean mDismissed = true;
 
     private OnStartBtnClicked listener;
 
@@ -99,6 +100,7 @@ public class ObjectiveFragment extends DialogFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
+        mDismissed = false;
     }
 
     @Override
@@ -107,6 +109,7 @@ public class ObjectiveFragment extends DialogFragment {
         if(listener != null){
             listener.onCancel();
         }
+        mDismissed = true;
     }
 
     @Override
@@ -115,6 +118,9 @@ public class ObjectiveFragment extends DialogFragment {
        Utils.setFullScreen((ViewGroup)mContent);
     }
 
+    public boolean isDismissed(){
+        return mDismissed;
+    }
 
     public void init (int levelId){
         mLevelId = levelId;

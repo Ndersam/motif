@@ -1,10 +1,8 @@
 package com.nders.motif;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -14,12 +12,11 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.nders.motif.data.LevelDatabaseHelper;
-import com.nders.motif.game.Level;
 import com.nders.motif.game.State;
 import com.nders.motif.views.GameView;
 
 
-public class GameFragment extends Fragment implements GameView.GameOverListener{
+public class GameFragment extends Fragment implements GameView.GameListener {
 
     /*
     *   Views
@@ -34,6 +31,7 @@ public class GameFragment extends Fragment implements GameView.GameOverListener{
 
     private static final String TAG = GameFragment.class.getSimpleName();
     private static GameFragment instance;
+    ObjectiveFragment menu = null;
 
 
     public GameFragment() {
@@ -137,6 +135,29 @@ public class GameFragment extends Fragment implements GameView.GameOverListener{
 
         transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.replace(R.id.game_content_frame, levelCompleteMenu).commit();
+    }
+
+    @Override
+    public void displayObjective() {
+        menu = new ObjectiveFragment();
+        menu.init(mGameID);
+        menu.setOnStartBtnClicked(new ObjectiveFragment.OnStartBtnClicked() {
+            @Override
+            public void onCancel() {
+
+            }
+
+            @Override
+            public void start(int levelId) {
+
+            }
+        });
+        menu.show(getActivity().getSupportFragmentManager(), "objective");
+    }
+
+    @Override
+    public boolean isObjectiveVisible(){
+        return menu != null && !menu.isDismissed();
     }
 
     public void restart(){
