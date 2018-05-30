@@ -125,7 +125,8 @@ public class Loader{
 
         Cursor edgeCursor = mMotifDatabaseHelper.rawQuery(query, null);
         if(edgeCursor.moveToFirst()) {
-            if(edgeCursor.getInt(MotifDatabaseHelper.KEY_WEIGHT) >= pref.getFloat(Constants.KEY_EDGE_THRESHOLD, Constants.EDGE_THRESHOLD)) {
+            if(edgeCursor.getInt(MotifDatabaseHelper.KEY_WEIGHT) >= Constants.DIFFICULTY_MULTIPLIER *
+                    pref.getFloat(Constants.KEY_EDGE_THRESHOLD, Constants.EDGE_THRESHOLD)) {
                 edgeExists = true;
             }
         }

@@ -1,5 +1,6 @@
 package com.nders.motif.game;
 
+import com.nders.motif.Constants;
 import com.nders.motif.entities.Dot;
 import com.nders.motif.entities.DotColor;
 
@@ -38,13 +39,24 @@ public class State {
     // ... with a certain dotColor to be collected) and the second (the number of dots with
     // ... a such dotColor that have been collected)
     private EnumMap<DotColor, int[]> mProgressCounter = new EnumMap<>(DotColor.class);
+    private EnumMap<DotColor, Integer> mDotColorCounter = new EnumMap<>(DotColor.class);
     public static final int IDX_DOTS_GOAL = 0;
     public static final int IDX_DOTS_COLLECTED = 1;
+    private boolean mAllDotsCollected = false;
+
+    private final int INIT_DOT_LIMIT;
+    private static int DOT_LIMIT;
+
+    private EnumMap<DotColor, Boolean> mCollectedDots = new EnumMap<>(DotColor.class);
+
 
     public State(Level level){
+        int edge = 0;
         mLevel = level;
         for(DotColor key: mLevel.getObjective().keySet()){
             mProgressCounter.put(key, new int[]{mLevel.getObjective().get(key), 0});
+            mDotColorCounter.put(key, 0);
+
             if(isROYDot(key)){
                 mGoodROYDots++;
             }else{
@@ -53,10 +65,12 @@ public class State {
         }
         mMovesLeft = mLevel.moves();
         mScore = 0;
+        INIT_DOT_LIMIT = (int)Math.ceil((36f / mProgressCounter.size())) + (int)Math.ceil(Math.random()*5);
+        DOT_LIMIT = INIT_DOT_LIMIT;
 
-        if(mGoodNonROYDots >= mGoodROYDots *.75f){
-            RED_DOT_LIMIT = 19;
-        }
+//        if(mGoodNonROYDots < mGoodROYDots){
+//            Constants.DIFFICULTY_MULTIPLIER = 2f;
+//        }
         mGoodROYDots = mGoodNonROYDots = 0;
     }
 
@@ -78,17 +92,11 @@ public class State {
 
         for(Dot dot: selected){
             if(mProgressCounter.containsKey(dot.dotColor())){
-                if(!isROYDot(dot.dotColor())){
-                    mGoodNonROYDots--;
-                }else{
-                    mGoodROYDots--;
-                }
-            }else {
-                if(dot.dotColor() == DotColor.RED){
-                    mRedDotCount--;
-                }else{
-                    mBadDotCount--;
-                }
+                int val = mDotColorCounter.get(dot.dotColor()) - 1;
+                mDotColorCounter.put(dot.dotColor(), val);
+            }
+            else if(dot.dotColor() == DotColor.RED){
+                mRedDotCount--;
             }
         }
 
@@ -97,6 +105,15 @@ public class State {
             int[] values = mProgressCounter.get(selectedColor);
             values[IDX_DOTS_COLLECTED] += selected.size();
             mProgressCounter.put(selectedColor,values);
+
+            if(isCollected(selectedColor) && !mCollectedDots.containsKey(selectedColor)){
+                DOT_LIMIT += INIT_DOT_LIMIT;
+                mCollectedDots.put(selectedColor, true);
+            }
+
+            if(mCollectedDots.size() == mProgressCounter.size()){
+                mAllDotsCollected = true;
+            }
         }
     }
 
@@ -114,31 +131,23 @@ public class State {
     public boolean isNodeValid(int degree) {
         DotColor key = DotColor.valueOf(degree);
 
-        boolean isValid = true;
+        boolean isValid = false;
 
         // Inspect for validity
+
         if(mProgressCounter.containsKey(key)){
-            if(!isROYDot(key)){
-                if(mGoodNonROYDots < GOOD_NON_ROY_LIMIT){
-                    mGoodNonROYDots++;
-                }else {
-                    isValid = false;
-                }
-            }else{
-                if(mGoodROYDots < GOOD_ROY_LIMIT){
-                    mGoodROYDots++;
-                }else{
-                    isValid = false;
-                }
+            if( mDotColorCounter.get(key) < DOT_LIMIT && (!isCollected(key)) || mAllDotsCollected){
+                int val = mDotColorCounter.get(key) + 1;
+                mDotColorCounter.put(key, val);
+                isValid = true;
             }
         }
-        else if(key == DotColor.RED && mRedDotCount < RED_DOT_LIMIT){
+        else if(key == DotColor.RED && mRedDotCount < 8){
             mRedDotCount++;
-        }else if(mBadDotCount < BAD_DOT_LIMIT){
-            mBadDotCount++;
-        }else{
-            isValid = false;
+            isValid = true;
         }
+
+
         return isValid;
     }
 

@@ -86,6 +86,8 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     private volatile boolean mSurfaceCreated = false;
     float mx, my, mStartX, mStartY;
 
+    long mLastActive = -1;
+
     Dot mStartDot = null;
 
     Queue<Tutorial> mTutorials ;
@@ -151,6 +153,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
             sInstance.pause();
         }
     }
+
     public static void quitInstance(){
         if(sInstance != null){
             sInstance.pause();
@@ -174,6 +177,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
 
         // Handles the drawing of lines
         onTouchEventLine(event);
+        mLastActive = System.currentTimeMillis();
         return true;
     }
 
@@ -184,7 +188,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
                 mStartY = my;
                 for(List<Dot> dots: mDots){
                     for(Dot dot: dots){
-                        if(dot.contains(mStartX, mStartY)){
+                        if(dot != null && dot.contains(mStartX, mStartY)){
                             mStartX = dot.centreX();
                             mStartY = dot.centreY();
                             mStartDot = dot;
@@ -220,7 +224,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
                         // IF "rect" CONTAINS THE COORDINATE, {mx, my},...
                         // A LINE COULD BE DRAWN
                         //==============================================================
-                        if (dot.contains(mx, my)) {
+                        if (dot != null && dot.contains(mx, my)) {
                             mx = dot.centreX();
                             my = dot.centreY();
 
@@ -333,11 +337,32 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     private void onActionDown(){
         if(t.milestone() == Tutorial.MILESTONE.COLOR_CHECK ){
             if(t.milestoneReached(mStartDot.dotColor(), mSelectedDots.size(), mStartDot.id())){
-                draw();
                 Canvas canvas = mSurfaceHolder.lockCanvas(null);
+                canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
+                mDotPaint.setColor(mStartDot.color());
+                for(List<Dot> dots: mDots){
+                    for(Dot dot: dots){
+                        if(dot != null){
+                            if(t.checkEdge(mStartDot.id(), dot.id())){
+                                canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mDotPaint);
+                            }else{
+                                canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mBlackPaint);
+                            }
+                        }
+                    }
+                }
                 displayFeedback(canvas);
                 mSurfaceHolder.unlockCanvasAndPost(canvas);
+                sleep(80);
             }
+        }
+    }
+
+    private void sleep(int millis){
+        try {
+            Thread.sleep(TIME_DELAY*millis);
+        }catch (InterruptedException e){
+            e.printStackTrace();
         }
     }
 
@@ -360,13 +385,15 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
             canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
             for(List<Dot> dots: mDots){
                 for(Dot dot: dots){
-                    // only draw unselected dots
-                    if(!dot.isSelected()){
-                        mDotPaint.setColor(dot.color());
-                        canvas.drawCircle(dot.centreX(), dot.centreY(), dot.radius(), mDotPaint);
-                    }
-                    else{
-                        dotsPerColumn.put(dots.indexOf(dot), 1 + dotsPerColumn.get(dots.indexOf(dot), 0));
+                    if(dot != null){
+                        // only draw unselected dots
+                        if(!dot.isSelected()){
+                            mDotPaint.setColor(dot.color());
+                            canvas.drawCircle(dot.centreX(), dot.centreY(), dot.radius(), mDotPaint);
+                        }
+                        else{
+                            dotsPerColumn.put(dots.indexOf(dot), 1 + dotsPerColumn.get(dots.indexOf(dot), 0));
+                        }
                     }
                 }
             }
@@ -397,7 +424,8 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
                     int column = dotsPerColumn.keyAt(i);
                     for(int row = mDots.size() - 1; row > 0; row--){
                         // if the above dot is unselected and the one below in selected
-                        if( mDots.get(row).get(column).isSelected() && !mDots.get(row - 1).get(column).isSelected()){
+                        if(mDots.get(row).get(column) != null && mDots.get(row - 1).get(column) !=null &&
+                        mDots.get(row).get(column).isSelected() && !mDots.get(row - 1).get(column).isSelected()){
                             Dot.swap(mDots.get(row).get(column),  mDots.get(row - 1).get(column));
                             mDots.get(row).get(column).deSelect();
                             mDots.get(row - 1).get(column).select();
@@ -415,9 +443,11 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
                         for(int i = dots.size() -1; i >= 0 ; i--){
                             Dot dot = dots.get(i);
                             // only draw unselected dots
-                            if(!dot.isSelected()){
-                                mDotPaint.setColor(dot.color());
-                                canvas.drawCircle(dot.centreX(), dot.centreY(), dot.radius(), mDotPaint);
+                            if(dot !=  null){
+                                if(!dot.isSelected()){
+                                    mDotPaint.setColor(dot.color());
+                                    canvas.drawCircle(dot.centreX(), dot.centreY(), dot.radius(), mDotPaint);
+                                }
                             }
                         }
                     }
@@ -439,7 +469,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
             ////////////////////////////////////////////
 
             for(List<Dot> dots: mDots){
-                dots.removeIf(x -> x.isSelected());
+                dots.removeIf(x -> x != null &&x.isSelected());
             }
             mDots.removeIf(x -> x.isEmpty());
 
@@ -486,14 +516,16 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
             mDotPaint.setColor(mStartDot.color());
             for(List<Dot> dots: mDots){
                 for(Dot dot: dots){
-                    if(dot.id() != mStartDot.id()){
-                        if(t.checkEdge(mStartDot.id(), dot.id())){
+                    if(dot != null){
+                        if(dot.id() != mStartDot.id()){
+                            if(t.checkEdge(mStartDot.id(), dot.id())){
+                                canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mDotPaint);
+                            }else{
+                                canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mBlackPaint);
+                            }
+                        } else {
                             canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mDotPaint);
-                        }else{
-                            canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mBlackPaint);
                         }
-                    } else {
-                        canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mDotPaint);
                     }
                 }
             }
@@ -534,17 +566,58 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
         mState = STATE.DO_NOTHING;
     }
 
+    private void onActionNothing(){
+        float time_delta = (System.currentTimeMillis() - mLastActive)/1000;
+        if(time_delta > 1.3 && t.idleInstructions() != null){
+            Canvas canvas = mSurfaceHolder.lockCanvas(null);
+            canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
+
+            for(List<Dot> dots: mDots){
+                for(Dot dot: dots){
+                    if(dot != null){
+                        if(dot.isSelected())
+                            Log.i(TAG, dot.id() + "");
+                        dot.deSelect();
+                        mDotPaint.setColor(dot.color());
+                        canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mDotPaint);
+                    }
+                }
+            }
+
+            displayInstruction(canvas);
+            drawIdleInstruction(canvas);
+            mSurfaceHolder.unlockCanvasAndPost(canvas);
+
+            mLastActive = System.currentTimeMillis();
+        }
+
+    }
+
+    private void drawIdleInstruction(Canvas canvas){
+        int x = getWidth()/2, y = (getHeight()*3)/4;
+
+        String text = t.idleInstructions();
+        if(text != null){
+            for (String line: text.split("\n")) {
+                canvas.drawText(line, x, y, mTextPaint);
+                y += mTextPaint.descent() - mTextPaint.ascent();
+            }
+        }
+    }
+
     private void draw(){
         Canvas canvas = mSurfaceHolder.lockCanvas(null);
         canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
 
         for(List<Dot> dots: mDots){
             for(Dot dot: dots){
-                if(dot.isSelected())
-                    Log.i(TAG, dot.id() + "");
-                dot.deSelect();
-                mDotPaint.setColor(dot.color());
-                canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mDotPaint);
+                if(dot != null){
+                    if(dot.isSelected())
+                        Log.i(TAG, dot.id() + "");
+                    dot.deSelect();
+                    mDotPaint.setColor(dot.color());
+                    canvas.drawCircle(dot.centreX(), dot.centreY(), DOT_RADIUS, mDotPaint);
+                }
             }
         }
 
@@ -553,7 +626,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     private void displayInstruction(Canvas canvas){
-        int x = getWidth()/2, y = getHeight()/3;
+        int x = getWidth()/2, y = getHeight()/4;
 
         String text = t.instruction();
         if(text != null){
@@ -573,44 +646,59 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     private void loadTutorial(Tutorial t){
-
         Queue<DotNode> dotNodes = new LinkedList<>();
         dotNodes.addAll(t.data());
         mDots.clear();
 
-        int col;
-        int row;
+        int col =  (int)t.dimensions().get(1);
+        int row =  (int)t.dimensions().get(0);
 
-        // find the col count and row count that would make
-        // the dots appear most "square"
-        if(Math.sqrt(dotNodes.size()) == Math.floor(Math.sqrt(dotNodes.size()))){
-            col = row = (int)Math.sqrt(dotNodes.size());
-        }else{
-            // TODO
-            row = 1;
-            col = dotNodes.size();
-        }
-
-
-        int STARTY = (getMeasuredHeight() - row*(2*DOT_RADIUS) - (row - 1)*(VERTICAL_SPACING))/2 + VERTICAL_SPACING + DOT_RADIUS;
+        int STARTY = (getMeasuredHeight() - row*(2*DOT_RADIUS) - (row - 1)*(VERTICAL_SPACING))/2
+                + VERTICAL_SPACING + DOT_RADIUS + (2*DOT_RADIUS + VERTICAL_SPACING)*(row-1);
         int STARTX =  (getMeasuredWidth() - col*(2*DOT_RADIUS) - (col - 1)*(VERTICAL_SPACING))/2 + DOT_RADIUS;
 
+        Stack<List<Dot>> stack = new Stack<>();
         for(int i = 0; i < row; i++){
             List<Dot> dotRow = new ArrayList<>();
 
+            int skip = 0;
+            if(i == (row - 1) ){
+                int rem = (col - dotNodes.size());
+                skip = rem/2;
+//                STARTX += (2*DOT_RADIUS + VERTICAL_SPACING)*(rem/2);
+            }
+
+
             for(int j = 0; j < col; j++){
-                Dot dot = new Dot(STARTX, STARTY, DOT_RADIUS, dotNodes.poll());
-                dot.setTolerance(DOT_TOLERANCE);
+                Dot dot = null;
+                if(skip <= 0){
+                    if(!dotNodes.isEmpty()){
+                        dot = new Dot(STARTX, STARTY, DOT_RADIUS, dotNodes.poll());
+                        dot.setTolerance(DOT_TOLERANCE);
+                    }
+                }else{
+                    skip--;
+                }
+
                 dotRow.add(dot);
                 STARTX += 2*DOT_RADIUS + VERTICAL_SPACING;
             }
 
-            STARTY += 2*DOT_RADIUS + VERTICAL_SPACING;
+            STARTY -= 2*DOT_RADIUS + VERTICAL_SPACING;
             STARTX = (getMeasuredWidth() - (col*(2*DOT_RADIUS) + (col - 1)*(VERTICAL_SPACING)))/2 + DOT_RADIUS;
-            mDots.add(dotRow);
+            stack.push(dotRow);
         }
 
+        while(!stack.empty()){
+            mDots.add(stack.pop());
+        }
+
+        Canvas canvas = mSurfaceHolder.lockCanvas(null);
+        canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
+        mSurfaceHolder.unlockCanvasAndPost(canvas);
+        sleep(20);
         mState = STATE.RESET;
+        mReady = true;
     }
 
     public void start(){
@@ -651,9 +739,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
         Log.i(TAG, "Surface created");
         mSurfaceCreated = true;
         mSurfaceWasDestroyed = false;
-        t = mTutorials.peek();
-        loadTutorial(t);
-        mReady = true;
+//        mReady = true;
     }
 
     @Override
@@ -672,6 +758,17 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     public void run() {
         Log.i(TAG, "THREAD STARTED");
 
+        while (!mSurfaceCreated || mSurfaceWasDestroyed){
+            try{
+                Thread.sleep(3);
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+        }
+
+        t = mTutorials.peek();
+        loadTutorial(t);
+
         while(!mReady){
             Log.i(TAG, "Not ready.......");
             try{
@@ -682,6 +779,9 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
         }
 
         Log.i(TAG, "GAME RUNNING");
+
+        sleep(50);
+        mLastActive = System.currentTimeMillis();
         while (mRunning){
             try{
                 Thread.sleep(3);
@@ -702,6 +802,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
                     onActionReset();
                     break;
                 case DO_NOTHING:
+                    onActionNothing();
                     break;
             }
         }

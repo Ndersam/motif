@@ -33,9 +33,22 @@ public class Tutorial {
     private Queue<Integer> mDotColorCount;
     private Map<List, Boolean> mEdges;
     private List<DotNode> mDotNodes;
+    private Queue<String> mIdleInstructions;
+    private boolean mUpdateInstruction = false;
+    private Queue<List> mDotsDimensions;
 
     private static final List<List<DotNode>> sAllNodes = new ArrayList<>();
     private static final List<Map<List, Boolean>> sAllEdges = new ArrayList<>();
+
+    private Tutorial(){
+        mMilestones = new LinkedList<>();
+        mDotColors = new LinkedList<>();
+        mDotColorCount = new LinkedList<>();
+        mDotCounts = new LinkedList<>();
+        mInstructions = new LinkedList<>();
+        mIdleInstructions = new LinkedList<>();
+        mDotsDimensions = new LinkedList<>();
+    }
 
     public static Queue<Tutorial> tutorialList(Context context){
 
@@ -46,47 +59,92 @@ public class Tutorial {
         Tutorial t1 = new Tutorial();
         t1.mMilestones.add(MILESTONE.DOT_COUNT);
         t1.mDotCounts.add(2);
+        t1.mDotsDimensions.add(Arrays.asList(1, 2));
         t1.mEdges = sAllEdges.get(0);
         t1.mDotNodes = sAllNodes.get(0);
+        t1.mIdleInstructions.add("Connect the two dots to continue.");
         tutorials.add(t1);
 
         Tutorial t2 = new Tutorial();
         t2.mMilestones.add(MILESTONE.DOT_COUNT);
-        t2.mDotCounts.add(3);
-        t2.mInstructions.add("Can you connect 3 dots?");
-        t2.mEdges = sAllEdges.get(1);
-        t2.mDotNodes = sAllNodes.get(1);
+        t2.mDotCounts.add(2);
+        t2.mDotsDimensions.add(Arrays.asList(2, 1));
+        t2.mEdges = sAllEdges.get(0);
+        t2.mDotNodes = sAllNodes.get(0);
+        t2.mInstructions.add("Connections can also be vertical...");
         tutorials.add(t2);
 
         Tutorial t3 = new Tutorial();
-        t3.mMilestones.add(MILESTONE.COLOR_CHECK);
-        t3.mDotColors.add(DotColor.RED);
-        t3.mDotColorCount.add(14);
-        t3.mInstructions.add("Find, by touching and holding,\nthe dot with the most connections.");
         t3.mMilestones.add(MILESTONE.DOT_COUNT);
-        t3.mDotCounts.add(12);
-        t3.mInstructions.add("Now connect as many\ndots as possible.");
-        t3.mEdges = sAllEdges.get(2);
-        t3.mDotNodes = sAllNodes.get(2);
+        t3.mMilestones.add(MILESTONE.DOT_COUNT);
+        t3.mDotCounts.addAll(Arrays.asList(2, 2));
+        t3.mDotsDimensions.add(Arrays.asList(2,3));
+        t3.mInstructions.add("...but NOT diagonal.");
+        t3.mInstructions.add("...but NOT diagonal.");
+        t3.mEdges = sAllEdges.get(1);
+        t3.mDotNodes = sAllNodes.get(1);
         tutorials.add(t3);
+
+        Tutorial t4 = new Tutorial();
+
+        t4.mMilestones.add(MILESTONE.COLOR_CHECK);
+        t4.mDotColors.add(DotColor.RED);
+        t4.mDotColorCount.add(14);
+        t4.mInstructions.add("TOUCHING a dot, shows\n\nother dots it can\n\nconnect to in the same color.");
+        t4.mIdleInstructions.add("Find the RED dot with\n\nthe most connections.");
+
+        t4.mMilestones.add(MILESTONE.DOT_COUNT);
+        t4.mDotCounts.add(12);
+        t4.mInstructions.add("Now connect as many\n\ndots as possible.");
+        t4.mIdleInstructions.add("Connect the RED dot\n\nwith most connections");
+
+        t4.mDotsDimensions.add(Arrays.asList(4,4));
+        t4.mEdges = sAllEdges.get(2);
+        t4.mDotNodes = sAllNodes.get(2);
+        tutorials.add(t4);
+
+//        Tutorial t5 = new Tutorial();
+//
+//        t5.mMilestones.add(MILESTONE.COLOR_CHECK);
+//        t5.mDotColors.add(DotColor.RED);
+//        t5.mDotsDimensions.add(Arrays.asList(4,4));
+//        t5.mDotColorCount.add(14);
+//        t5.mInstructions.add("Find, by touching and holding,\nthe dot with the most connections.");
+//
+//        t5.mMilestones.add(MILESTONE.DOT_COUNT);
+//        t5.mDotCounts.add(12);
+//        t5.mInstructions.add("Now connect as many\ndots as possible.");
+//
+//        t5.mEdges = sAllEdges.get(2);
+//        t5.mDotNodes = sAllNodes.get(2);
+//        tutorials.add(t5);
 
         return tutorials;
     }
 
-    private Tutorial(){
-        mMilestones = new LinkedList<>();
-        mDotColors = new LinkedList<>();
-        mDotColorCount = new LinkedList<>();
-        mDotCounts = new LinkedList<>();
-        mInstructions = new LinkedList<>();
-    }
 
+    public List dimensions(){
+        return mDotsDimensions.peek();
+    }
     public final MILESTONE milestone() {
         return mMilestones.peek();
     }
 
     public final String instruction() {
+        if(mUpdateInstruction){
+            if(!mInstructions.isEmpty()){
+                mInstructions.poll();
+            }
+            if(!mIdleInstructions.isEmpty()){
+                mIdleInstructions.poll();
+            }
+            mUpdateInstruction = false;
+        }
         return mInstructions.isEmpty()? null: mInstructions.peek();
+    }
+
+    public final String idleInstructions(){
+        return mIdleInstructions.isEmpty()? null: mIdleInstructions.peek();
     }
 
     public final boolean milestoneReached(DotColor dotColor, int dotCount, int startid) {
@@ -117,7 +175,7 @@ public class Tutorial {
         if(result){
             mMilestones.poll();
             if(!mInstructions.isEmpty()){
-                mInstructions.poll();
+                mUpdateInstruction = true;
             }
         }
 
