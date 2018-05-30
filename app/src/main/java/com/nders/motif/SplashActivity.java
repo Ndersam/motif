@@ -46,7 +46,7 @@ public class SplashActivity extends AppCompatActivity {
         // TODO : [2]  27/02/2018 Check Other settings
         //
         final Intent i;
-        if(pref.getBoolean(Constants.KEY_FIRST_LAUNCH, true)){
+        if(pref.getBoolean(Constants.KEY_FIRST_LAUNCH, false)){
             i = new Intent(SplashActivity.this, TutorialActivity.class);
         }else{
             i = new Intent(SplashActivity.this, HomeActivity.class);
