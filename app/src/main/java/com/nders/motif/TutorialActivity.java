@@ -1,7 +1,9 @@
 package com.nders.motif;
 
+import android.content.SharedPreferences;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
@@ -29,6 +31,9 @@ public class TutorialActivity extends AppCompatActivity implements TutorialFragm
     @Override
     public void quitFragment() {
         Log.i("TutorialActivity", "I WAS CALLED");
+
+//        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+//        pref.edit().putBoolean(Constants.KEY_FIRST_LAUNCH, false).apply();
 
         Fragment f = new TutorialCompleteFragment();
         TutorialFragment.quitInstance();

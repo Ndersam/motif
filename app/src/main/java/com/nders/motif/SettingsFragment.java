@@ -156,14 +156,14 @@ public class SettingsFragment extends Fragment {
             float difficulty;
 
             if(Constants.EASY_MODE.compareTo((String)btn.getTag()) == 0){
-                difficulty = 1f;
+                difficulty = Constants.VALUE_EASY;
             }else if(Constants.NORMAL_MODE.compareTo((String)btn.getTag()) == 0){
-                difficulty = 2f;
+                difficulty = Constants.VALUE_NORMAL;
             }else if(Constants.HARD_MODE.compareTo((String)btn.getTag()) == 0){
-                difficulty = 3f;
+                difficulty = Constants.VALUE_HARD;
             }else{
                 // Constants.EXTREME_MODE
-                difficulty = 4f;
+                difficulty = Constants.VALUE_EXTREME;
             }
 
             pref.edit().putFloat(Constants.KEY_EDGE_THRESHOLD, difficulty).apply();

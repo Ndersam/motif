@@ -53,10 +53,11 @@ public  class Constants {
     /*
     *   Game difficulty
      */
-    public static float EDGE_THRESHOLD = 1f;
     public static final float VALUE_EASY = 2f;
     public static final float VALUE_NORMAL = 4f;
     public static final float VALUE_HARD = 5f;
     public static final float VALUE_EXTREME = 6f;
+
+    public static float DIFFICULTY_MULTIPLIER = 1f;
 
 }

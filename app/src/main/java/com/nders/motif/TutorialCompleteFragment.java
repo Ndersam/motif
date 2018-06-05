@@ -77,13 +77,13 @@ public class TutorialCompleteFragment extends Fragment {
             }
         });
 
-        animY.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                super.onAnimationEnd(animation);
-                mButtonSetAnimator.start();
-            }
-        });
+//        animY.addListener(new AnimatorListenerAdapter() {
+//            @Override
+//            public void onAnimationEnd(Animator animation) {
+//                super.onAnimationEnd(animation);
+//                mButtonSetAnimator.start();
+//            }
+//        });
 
         return view;
     }

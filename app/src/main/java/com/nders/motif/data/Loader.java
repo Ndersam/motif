@@ -78,10 +78,6 @@ public class Loader{
     }
 
 
-    public void disableLoadAll(){
-        mLoadAll = false;
-    }
-
     /**
      * Checks edgeMap for the value of an edge.
      * An edge is represented as an ArrayList of the IDs of the source and target nodes
@@ -126,7 +122,7 @@ public class Loader{
         Cursor edgeCursor = mMotifDatabaseHelper.rawQuery(query, null);
         if(edgeCursor.moveToFirst()) {
             if(edgeCursor.getInt(MotifDatabaseHelper.KEY_WEIGHT) >= Constants.DIFFICULTY_MULTIPLIER *
-                    pref.getFloat(Constants.KEY_EDGE_THRESHOLD, Constants.EDGE_THRESHOLD)) {
+                    pref.getFloat(Constants.KEY_EDGE_THRESHOLD, Constants.VALUE_NORMAL)) {
                 edgeExists = true;
             }
         }

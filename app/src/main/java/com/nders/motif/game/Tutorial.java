@@ -103,22 +103,6 @@ public class Tutorial {
         t4.mDotNodes = sAllNodes.get(2);
         tutorials.add(t4);
 
-//        Tutorial t5 = new Tutorial();
-//
-//        t5.mMilestones.add(MILESTONE.COLOR_CHECK);
-//        t5.mDotColors.add(DotColor.RED);
-//        t5.mDotsDimensions.add(Arrays.asList(4,4));
-//        t5.mDotColorCount.add(14);
-//        t5.mInstructions.add("Find, by touching and holding,\nthe dot with the most connections.");
-//
-//        t5.mMilestones.add(MILESTONE.DOT_COUNT);
-//        t5.mDotCounts.add(12);
-//        t5.mInstructions.add("Now connect as many\ndots as possible.");
-//
-//        t5.mEdges = sAllEdges.get(2);
-//        t5.mDotNodes = sAllNodes.get(2);
-//        tutorials.add(t5);
-
         return tutorials;
     }
 

@@ -82,7 +82,7 @@
                 android:text="34"
                 android:textAlignment="center"
                 android:textColor="@color/unselected_tab"
-                android:textSize="48sp" />
+                android:textSize="54sp" />
 
         </LinearLayout>
 

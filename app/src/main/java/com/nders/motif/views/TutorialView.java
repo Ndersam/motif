@@ -780,7 +780,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
 
         Log.i(TAG, "GAME RUNNING");
 
-        sleep(50);
+        sleep(40);
         mLastActive = System.currentTimeMillis();
         while (mRunning){
             try{

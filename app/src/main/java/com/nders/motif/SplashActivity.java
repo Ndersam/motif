@@ -42,11 +42,8 @@ public class SplashActivity extends AppCompatActivity {
         Intent intent = new Intent(this, DataInitService.class);
         startService(intent);
 
-
-        // TODO : [2]  27/02/2018 Check Other settings
-        //
         final Intent i;
-        if(pref.getBoolean(Constants.KEY_FIRST_LAUNCH, false)){
+        if(pref.getBoolean(Constants.KEY_FIRST_LAUNCH, true)){
             i = new Intent(SplashActivity.this, TutorialActivity.class);
         }else{
             i = new Intent(SplashActivity.this, HomeActivity.class);
