@@ -27,11 +27,6 @@ public class TutorialFragment extends Fragment implements TutorialView.OnComplet
         return sInstance;
     }
 
-    public static void quitInstance(){
-        if(sInstance != null){
-            Log.i("TutorialFragment", "Quit Intacne");
-        }
-    }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {

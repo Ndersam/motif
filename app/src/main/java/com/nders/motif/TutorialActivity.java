@@ -36,7 +36,6 @@ public class TutorialActivity extends AppCompatActivity implements TutorialFragm
 //        pref.edit().putBoolean(Constants.KEY_FIRST_LAUNCH, false).apply();
 
         Fragment f = new TutorialCompleteFragment();
-        TutorialFragment.quitInstance();
         FragmentManager manager = getSupportFragmentManager();
         FragmentTransaction transaction = manager.beginTransaction();
         transaction.replace(R.id.tutorial_container, f)

@@ -22,11 +22,11 @@ import com.nders.motif.R;
 import com.nders.motif.SoundHelper;
 import com.nders.motif.Utils;
 import com.nders.motif.data.LevelDatabaseHelper;
+import com.nders.motif.data.Loader;
 import com.nders.motif.entities.Dot;
 import com.nders.motif.entities.DotColor;
 import com.nders.motif.entities.DotNode;
 import com.nders.motif.entities.Line;
-import com.nders.motif.data.Loader;
 import com.nders.motif.game.Level;
 import com.nders.motif.game.State;
 

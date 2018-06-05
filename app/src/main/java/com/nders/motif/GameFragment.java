@@ -18,18 +18,9 @@ import com.nders.motif.views.GameView;
 
 public class GameFragment extends Fragment implements GameView.GameListener {
 
-    /*
-    *   Views
-    */
-    //private GameView mGameView;
-
-    /*
-    *   Game Logic
-    */
-    private int mGameID = 1;
-
-
     private static final String TAG = GameFragment.class.getSimpleName();
+
+    private int mGameID = 1;
     private static GameFragment instance;
     ObjectiveFragment menu = null;
 

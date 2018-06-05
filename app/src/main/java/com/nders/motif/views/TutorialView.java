@@ -36,7 +36,6 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
 
     private static final String TAG = TutorialView.class.getSimpleName();
 
-    private static final int MAX_ROW_COUNT = 6;
     private static long TIME_DELAY;
 
     enum STATE {ACTION_DOWN, ACTION_UP, MOVING, RESET, DO_NOTHING}
@@ -47,7 +46,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
 
     /*
     *   DRAWING PARAMETERS
-     */
+    */
 
     Paint mDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
     Paint mBlackPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
@@ -76,7 +75,6 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     List<DotNode> mDotNodes = new ArrayList<>();
     Stack<Line> mLines = new Stack<>();
     Stack<Dot> mSelectedDots = new Stack<>();
-    SparseIntArray mRelatedDots = new SparseIntArray();
 
     private volatile boolean mReady = false;
     private volatile boolean mIsDrawing = true;
@@ -145,9 +143,6 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
         return sInstance;
     }
 
-    /**
-     * Used to quit and destroy the Singleton static instance of the class.
-     */
     public static void pauseInstance(){
         if(sInstance != null){
             sInstance.pause();
