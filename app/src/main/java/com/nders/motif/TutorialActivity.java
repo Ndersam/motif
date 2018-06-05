@@ -32,8 +32,8 @@ public class TutorialActivity extends AppCompatActivity implements TutorialFragm
     public void quitFragment() {
         Log.i("TutorialActivity", "I WAS CALLED");
 
-//        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
-//        pref.edit().putBoolean(Constants.KEY_FIRST_LAUNCH, false).apply();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+        pref.edit().putBoolean(Constants.KEY_FIRST_LAUNCH, false).apply();
 
         Fragment f = new TutorialCompleteFragment();
         FragmentManager manager = getSupportFragmentManager();
