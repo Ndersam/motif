@@ -25,18 +25,18 @@ public class AboutFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View contentView = inflater.inflate(R.layout.fragment_about, container, false);
-        TextView txtUrl = contentView.findViewById(R.id.about_github);
+//        TextView txtUrl = contentView.findViewById(R.id.about_github);
         final TextView txtCopyright = contentView.findViewById(R.id.about_copyright);
         ImageView backBtn = contentView.findViewById(R.id.about_back_btn);
 
-        txtUrl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                String url = "https://github.com/Ndersam/QDM";
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-                startActivity(browserIntent);
-            }
-        });
+//        txtUrl.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                String url = "https://github.com/Ndersam/motif";
+//                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+//                startActivity(browserIntent);
+//            }
+//        });
 
         txtCopyright.setOnClickListener(new View.OnClickListener() {
             @Override

@@ -22,7 +22,7 @@
         android:textColor="@color/white"/>
 
     <Button
-        android:layout_marginBottom="120dp"
+        android:layout_marginBottom="12dp"
         android:id="@+id/btn_options"
         android:layout_width="120dp"
         android:layout_gravity="bottom|center_horizontal"
@@ -31,13 +31,13 @@
         android:text="Options"
         android:textColor="@color/white"/>
 
-    <!--<Button-->
-        <!--android:layout_marginBottom="60dp"-->
-        <!--android:id="@+id/btn_about"-->
-        <!--android:layout_width="120dp"-->
-        <!--android:layout_gravity="bottom|center_horizontal"-->
-        <!--android:layout_height="40dp"-->
-        <!--android:background="@drawable/button_about"-->
-        <!--android:text="About"-->
-        <!--android:textColor="@color/white"/>-->
+    <Button
+        android:layout_marginBottom="120dp"
+        android:id="@+id/btn_about"
+        android:layout_width="120dp"
+        android:layout_gravity="bottom|center_horizontal"
+        android:layout_height="40dp"
+        android:background="@drawable/button_about"
+        android:text="About"
+        android:textColor="@color/white"/>
 </LinearLayout>

@@ -14,8 +14,9 @@
 
     <!-- About Page -->
     <string name="about_description">
-        Motif is puzzle game about connecting dots.\n\nIt is part of a research project developed
-        by the City University of Hong Kong, Department of Computer Science.
+        Motif is puzzle game about connecting DNA motifs.\n\nIt is part of a research project developed
+        by the City University of Hong Kong, Department of Computer Science.\n\nThis project was funded
+        by the Hong Kong Research Grant Council (CityU 21200816).
     </string>
     <string name="about_description_more">
         Motif brings to life the data collated from a research. The data is akin to a social network.

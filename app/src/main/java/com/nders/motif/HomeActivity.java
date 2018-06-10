@@ -21,7 +21,7 @@ public class HomeActivity extends AppCompatActivity {
 
         Button btnPlay = findViewById(R.id.btn_play);
         Button btnOptions = findViewById(R.id.btn_options);
-//        Button btnAbout = findViewById(R.id.btn_about);
+        Button btnAbout = findViewById(R.id.btn_about);
 
         btnPlay.setOnClickListener( view ->{
                 SoundHelper.getInstance(HomeActivity.this).playButtonClick();
@@ -39,16 +39,16 @@ public class HomeActivity extends AppCompatActivity {
                 overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
         });
 
-//        btnAbout.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                SoundHelper.getInstance(HomeActivity.this).playButtonClick();
-//                Intent intent = new Intent(HomeActivity.this, AboutAndOptionsActivity.class);
-//                intent.putExtra(Constants.KEY_ABOUT_OR_OPTIONS, Constants.VALUE_ABOUT);
-//                startActivity(intent);
-//                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
-//            }
-//        });
+        btnAbout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SoundHelper.getInstance(HomeActivity.this).playButtonClick();
+                Intent intent = new Intent(HomeActivity.this, AboutAndOptionsActivity.class);
+                intent.putExtra(Constants.KEY_ABOUT_OR_OPTIONS, Constants.VALUE_ABOUT);
+                startActivity(intent);
+                overridePendingTransition(R.anim.fade_in, R.anim.fade_out);
+            }
+        });
     }
 
     @Override

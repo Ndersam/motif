@@ -124,4 +124,9 @@ public class Dot {
     public DotColor dotColor(){
         return DotColor.valueOf(mDotNode.degree);
     }
+
+    @Override
+    public String toString() {
+        return mDotNode != null ? mDotNode.label : "null";
+    }
 }

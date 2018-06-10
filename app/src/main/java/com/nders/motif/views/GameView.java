@@ -91,6 +91,7 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
     protected Rect footerRect;
     protected Rect scoreRect;
     protected Rect movesRect;
+    protected Rect labelRect;
 
     // Colors
     protected int BACKGROUND_COLOR  = Color.WHITE;
@@ -829,24 +830,6 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
 
     private synchronized void onActionReset(){
 
-        Log.i(TAG, "Buffered: " + mBufferSize + "; Recycled: " + (mNodes.size() - mBufferSize));
-
-        //========================
-        // REDRAW UI
-        //========================
-        Canvas canvas = mSurfaceHolder.lockCanvas(null);
-        canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
-
-        drawHeaderAndFooter(canvas);
-
-        for(List<Dot> dotRow: mDotRows){
-            for(Dot dot: dotRow){
-                mColorDotPaint.setColor(dot.color());
-                canvas.drawCircle(dot.centreX(), dot.centreY(), dot.radius(), mColorDotPaint);
-            }
-        }
-        mSurfaceHolder.unlockCanvasAndPost(canvas);
-
         //===========================
         // RESET
         //===========================
@@ -869,6 +852,26 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         mSelectedDots.clear();
         mStartDot =  null;
         mState = STATE.DO_NOTHING;
+
+        //---------------------------------
+
+        Log.i(TAG, "Buffered: " + mBufferSize + "; Recycled: " + (mNodes.size() - mBufferSize));
+
+        //========================
+        // REDRAW UI
+        //========================
+        Canvas canvas = mSurfaceHolder.lockCanvas(null);
+        canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
+
+        drawHeaderAndFooter(canvas);
+
+        for(List<Dot> dotRow: mDotRows){
+            for(Dot dot: dotRow){
+                mColorDotPaint.setColor(dot.color());
+                canvas.drawCircle(dot.centreX(), dot.centreY(), dot.radius(), mColorDotPaint);
+            }
+        }
+        mSurfaceHolder.unlockCanvasAndPost(canvas);
 
         if(mGameListener != null){
             boolean isOver = false;
@@ -936,6 +939,8 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         footerRect = new Rect(0, getMeasuredHeight() - HEADER_FOOTER_HEIGHT, getMeasuredWidth(), getMeasuredHeight());
         scoreRect = new Rect(0, 0, SCORE_TEXT_DIM, SCORE_TEXT_DIM);
         movesRect = new Rect(getMeasuredWidth() - SCORE_TEXT_DIM, 0, getMeasuredWidth(), SCORE_TEXT_DIM);
+        labelRect = new Rect(scoreRect.right + 10, headerRect.bottom + 10, movesRect.left - 10,
+                headerRect.bottom + 10 + SCORE_TEXT_DIM/2);
     }
 
 
@@ -1022,6 +1027,14 @@ public class GameView extends SurfaceView implements Runnable, SurfaceHolder.Cal
         //////////////////////////////////////////////
         mHeaderFooterPaint.setColor(HEADER_FOOTER_COLOR);
         canvas.drawRect(headerRect, mHeaderFooterPaint);
+
+//        canvas.drawRect(labelRect, mHeaderFooterPaint);
+        if(mStartDot != null){
+            mTextPaint.setColor(Color.parseColor("#8E5DAA"));
+            mTextPaint.setTextSize(60);
+            float y = labelRect.centerY() + mTextPaint.descent();
+            canvas.drawText(mStartDot.toString(), labelRect.centerX(), y, mTextPaint);
+        }
 
         int numOfDots = 1;
         EnumMap<DotColor, Integer> objective = null;
