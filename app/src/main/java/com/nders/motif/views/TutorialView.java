@@ -52,6 +52,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     Paint mBlackPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
     Paint mPathPaint = new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
     TextPaint mTextPaint = new TextPaint(Paint.FAKE_BOLD_TEXT_FLAG|Paint.ANTI_ALIAS_FLAG);
+    Paint mTextPaint2 = new TextPaint(Paint.FAKE_BOLD_TEXT_FLAG|Paint.ANTI_ALIAS_FLAG);
 
     static final int DOT_RADIUS = 50;
     static final int VERTICAL_SPACING = 80;
@@ -82,6 +83,8 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     private volatile boolean mRunning = false;
     private boolean mSurfaceWasDestroyed = false;
     private volatile boolean mSurfaceCreated = false;
+    private volatile boolean mSkipTutorial = false;
+    private volatile boolean mCanSkip = false;
     float mx, my, mStartX, mStartY;
 
     long mLastActive = -1;
@@ -124,6 +127,13 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
         mTextPaint.setTextAlign(Paint.Align.CENTER);
         mTextPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
         mTextPaint.setTypeface(tf);
+
+        mTextPaint2.setStyle(Paint.Style.FILL);
+        mTextPaint2.setColor(Color.parseColor("#301E08"));
+        mTextPaint2.setTextSize(TEXT_SIZE_MEDIUM);
+        mTextPaint2.setStrokeWidth(3f);
+        mTextPaint2.setTextAlign(Paint.Align.LEFT);
+        mTextPaint2.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_OVER));
 
         // Surface holder
         mSurfaceHolder = getHolder();
@@ -169,6 +179,14 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
         // Retrieve the point
         mx = event.getX();
         my = event.getY();
+
+        if( (getHeight() - my) <= 200 &&  mx <= 450){
+            mSkipTutorial = true;
+            Log.i(TAG, "I am meant to skip-------------------");
+            mState = STATE.RESET;
+        }else{
+            mSkipTutorial = false;
+        }
 
         // Handles the drawing of lines
         onTouchEventLine(event);
@@ -362,6 +380,10 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     private void onActionUp(){
+
+        if(mStartDot == null){
+            return;
+        }
         if( (t.milestone() == Tutorial.MILESTONE.DOT_COUNT || t.milestone() == Tutorial.MILESTONE.COLOR_AND_COUNT_CHECK)
                 &&  t.milestoneReached(mStartDot.dotColor(), mSelectedDots.size(), mStartDot.id())){
 
@@ -552,8 +574,20 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
     }
 
     private void onActionReset(){
-        draw();
 
+        if(mCanSkip && mSkipTutorial){
+            try{
+                Thread.sleep(500);
+            }catch (InterruptedException e){
+                e.printStackTrace();
+            }
+
+            Log.i(TAG, "COMPLETED---------------");
+            mOnCompleteListener.quit();
+            return;
+        }
+
+        draw();
         mStartDot = null;
         mLines.clear();
         mSelectedDots.clear();
@@ -563,7 +597,7 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
 
     private void onActionNothing(){
         float time_delta = (System.currentTimeMillis() - mLastActive)/1000;
-        if(time_delta > 1.3 && t.idleInstructions() != null){
+        if(time_delta > 1.3 ){
             Canvas canvas = mSurfaceHolder.lockCanvas(null);
             canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
 
@@ -580,7 +614,11 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
             }
 
             displayInstruction(canvas);
-            drawIdleInstruction(canvas);
+            if (t.idleInstructions() != null){
+                drawIdleInstruction(canvas);
+            }
+            mCanSkip = true;
+            drawSkip(canvas);
             mSurfaceHolder.unlockCanvasAndPost(canvas);
 
             mLastActive = System.currentTimeMillis();
@@ -600,6 +638,12 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
         }
     }
 
+    private void drawSkip(Canvas canvas){
+        int x = 80;
+        int y = getHeight() - 80;
+        canvas.drawText("skip tutorial",x, y, mTextPaint2);
+    }
+
     private void draw(){
         Canvas canvas = mSurfaceHolder.lockCanvas(null);
         canvas.drawColor(BACKGROUND_COLOR, PorterDuff.Mode.SRC_OVER);
@@ -617,6 +661,9 @@ public class TutorialView extends SurfaceView implements SurfaceHolder.Callback,
         }
 
         displayInstruction(canvas);
+        if(mCanSkip){
+            drawSkip(canvas);
+        }
         mSurfaceHolder.unlockCanvasAndPost(canvas);
     }
 
