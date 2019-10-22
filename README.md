@@ -19,6 +19,6 @@ WARNING: alpha quality ( not all game levels have been properly designed ).
   ```
 2. In Android Studio selection "Open an Existing Android Studio Project"
 
-Note: You'll need Android SDK version 26, Java 8. 
+Note: You'll need Android SDK version 29, Java 8.
 ## License
 Licensed as Public Domain.
