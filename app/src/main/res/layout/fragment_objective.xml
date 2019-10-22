@@ -40,7 +40,7 @@
             android:layout_weight="1"
             android:orientation="horizontal">
 
-            <com.nders.motif.views.GameObjectiveView
+            <com.motif.motif.views.GameObjectiveView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:id="@+id/objective_image"/>

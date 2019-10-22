@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    package="com.nders.motif">
+    package="com.motif.motif">
 
     <uses-permission android:name="android.permission.VIBRATE" />
 
     <uses-permission-sdk-23 android:name="android.permission.VIBRATE" />
 
-    <application xmlns:tools="http://schemas.android.com/tools"
+    <application
         android:allowBackup="false"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
@@ -21,7 +21,7 @@
 
         <!-- Splash Screen -->
         <activity
-            android:name=".SplashActivity"
+            android:name="com.motif.motif.SplashActivity"
             android:label="@string/app_name"
             android:theme="@style/SplashTheme">
             <intent-filter>
@@ -33,7 +33,7 @@
 
         <!-- Home Activity -->
         <activity
-            android:name=".HomeActivity"
+            android:name="com.motif.motif.HomeActivity"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:label="@string/app_name"
             android:launchMode="singleInstance"
@@ -42,28 +42,28 @@
         <!-- Level Select Activity -->
         <activity
             android:label="@string/app_name"
-            android:name=".LevelSelectActivity"
-            android:parentActivityName=".HomeActivity"
+            android:name="com.motif.motif.LevelSelectActivity"
+            android:parentActivityName="com.motif.motif.HomeActivity"
             android:theme="@style/AppTheme" />
 
         <!-- Game Activity -->
         <activity
             android:label="@string/app_name"
-            android:name=".GameActivity"
+            android:name="com.motif.motif.GameActivity"
             android:theme="@style/AppTheme" />
 
         <service
             android:label="@string/app_name"
-            android:name=".data.DataInitService"
+            android:name="com.motif.motif.data.DataInitService"
             android:exported="false" />
 
         <activity
             android:label="@string/app_name"
-            android:name=".AboutAndOptionsActivity" />
+            android:name="com.motif.motif.AboutAndOptionsActivity" />
 
         <activity
             android:label="@string/app_name"
-            android:name=".TutorialActivity"/>
+            android:name="com.motif.motif.TutorialActivity"/>
     </application>
 
 </manifest>

@@ -8,7 +8,7 @@
     android:layout_gravity="center_horizontal|bottom"
     android:gravity="bottom|center_horizontal"
     android:id="@+id/home_layout"
-    tools:context="com.nders.motif.HomeActivity">
+    tools:context="com.motif.motif.HomeActivity">
 
 
     <Button

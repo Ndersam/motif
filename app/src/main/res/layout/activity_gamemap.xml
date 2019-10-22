@@ -4,7 +4,7 @@
     android:layout_height="match_parent"
     android:id="@+id/game_map_layout">
 
-    <com.nders.motif.views.GameMapView
+    <com.motif.motif.views.GameMapView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/game_map"/>

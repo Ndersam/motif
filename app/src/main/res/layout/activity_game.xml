@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.nders.motif.GameActivity"
+    tools:context="com.motif.motif.GameActivity"
     android:background="@color/white">
 
     <FrameLayout
